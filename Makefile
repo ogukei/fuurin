@@ -1,5 +1,5 @@
 
-# dependencies: libglfw3 libglfw3-dev
+# dependencies: libglfw3 libglfw3-dev libavformat-dev libavcodec-dev
 
 TARGET=main
 
@@ -15,7 +15,7 @@ CXXFLAGS=-O2 \
 	$(INCLUDES)
 
 LD=$(CXX)
-LDFLAGS=-lpthread -lvulkan
+LDFLAGS=-lpthread -lvulkan -lavformat -lavcodec
 
 LIBS=$(shell pkg-config --libs glfw3)
 
