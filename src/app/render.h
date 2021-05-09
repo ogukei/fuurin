@@ -1,5 +1,7 @@
 
+#pragma once
+
 class Render {
  public:
-  explicit Render();
+  Render();
 };

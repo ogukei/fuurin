@@ -1,15 +1,16 @@
 
-#include "device_queue.h"
+#include "vk/device_queue.h"
 
 #include <vector>
 
-#include "physical_device.h"
-#include "queue.h"
-#include "device.h"
+#include "vk/physical_device.h"
+#include "vk/queue.h"
+#include "vk/device.h"
 
 namespace vk {
 
-std::optional<std::shared_ptr<DeviceQueue>> DeviceQueue::Create(const std::shared_ptr<vk::PhysicalDevice>& physical_device) {
+std::optional<std::shared_ptr<DeviceQueue>> DeviceQueue::Create(
+    const std::shared_ptr<vk::PhysicalDevice>& physical_device) {
   auto device_queue = std::make_shared<DeviceQueue>(physical_device);
   if (device_queue->Initialize(device_queue)) {
     return device_queue;
@@ -18,8 +19,8 @@ std::optional<std::shared_ptr<DeviceQueue>> DeviceQueue::Create(const std::share
   }
 }
 
-DeviceQueue::DeviceQueue(const std::shared_ptr<vk::PhysicalDevice>& physical_device) : physical_device_(physical_device) {
-
+DeviceQueue::DeviceQueue(const std::shared_ptr<vk::PhysicalDevice>& physical_device)
+    : physical_device_(physical_device) {
 }
 
 bool DeviceQueue::Initialize(const std::shared_ptr<DeviceQueue>& device_queue) {
@@ -83,8 +84,7 @@ bool DeviceQueue::Initialize(const std::shared_ptr<DeviceQueue>& device_queue) {
 }
 
 DeviceQueue::~DeviceQueue() {
-
 }
 
 
-} // namespace vk
+}  // namespace vk

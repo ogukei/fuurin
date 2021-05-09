@@ -1,9 +1,12 @@
 
-#include <memory>
+#pragma once
 
-// Vulkan
+extern "C" {
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
+}
+
+#include <memory>
 
 namespace vk {
 
@@ -15,10 +18,10 @@ class PhysicalDevice {
   VkPhysicalDevice physical_device_;
  public:
   static std::shared_ptr<PhysicalDevice> Create(
-    std::shared_ptr<Instance>& instance
-  );
+    const std::shared_ptr<Instance>& instance);
 
-  explicit PhysicalDevice(std::shared_ptr<vk::Instance>& instance);
+  explicit PhysicalDevice(const std::shared_ptr<vk::Instance>& instance);
+
   PhysicalDevice(const PhysicalDevice&) = delete;
   ~PhysicalDevice();
 
@@ -27,4 +30,4 @@ class PhysicalDevice {
   const std::shared_ptr<vk::Instance>& Instance() const { return instance_; }
 };
 
-} // namespace vk
+}  // namespace vk

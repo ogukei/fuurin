@@ -1,13 +1,18 @@
 
-#include <memory>
-#include <vector>
+#pragma once
 
+extern "C" {
 // Vulkan
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
+}
+
+
+#include <memory>
+#include <vector>
 
 namespace video {
-  class Demux;
+class Demux;
 }
 
 namespace vk {
@@ -29,4 +34,4 @@ class VideoDecodeSession {
   void Setup();
 };
 
-} // namespace vk
+}  // namespace vk

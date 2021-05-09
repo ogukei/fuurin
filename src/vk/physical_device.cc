@@ -1,22 +1,22 @@
 
-#include "physical_device.h"
+#include "vk/physical_device.h"
 
 #include <vector>
 
-#include "instance.h"
+#include "vk/instance.h"
 
 namespace vk {
 
 std::shared_ptr<PhysicalDevice> PhysicalDevice::Create(
-    std::shared_ptr<vk::Instance>& instance
-) {
+    const std::shared_ptr<vk::Instance>& instance) {
   auto physical_device = std::make_shared<PhysicalDevice>(instance);
   physical_device->Initialize();
   return physical_device;
 }
 
-PhysicalDevice::PhysicalDevice(std::shared_ptr<vk::Instance>& instance) : instance_(instance) {
-
+PhysicalDevice::PhysicalDevice(
+    const std::shared_ptr<vk::Instance>& instance)
+    : instance_(instance) {
 }
 
 void PhysicalDevice::Initialize() {
@@ -34,8 +34,6 @@ void PhysicalDevice::Initialize() {
   physical_device_ = physical_device;
 }
 
-PhysicalDevice::~PhysicalDevice() {
-  
-}
+PhysicalDevice::~PhysicalDevice() {}
 
-} // namespace vk
+}  // namespace vk

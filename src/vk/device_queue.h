@@ -1,10 +1,14 @@
 
-#include <memory>
-#include <optional>
+#pragma once
 
+extern "C" {
 // Vulkan
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
+}
+
+#include <memory>
+#include <optional>
 
 namespace vk {
 
@@ -34,5 +38,4 @@ class DeviceQueue {
   const std::shared_ptr<vk::Queue>& Queue() const { return queue_; }
 };
 
-
-} // namespace vk
+}  // namespace vk

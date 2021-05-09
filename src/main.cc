@@ -1,18 +1,14 @@
 
 extern "C" {
-#include <stdio.h>
-}
-
-// GLFW
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
 // Vulkan
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
+// GLFW
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+}
 
-// Others
-#include "render.h"
+#include "app/render.h"
 
 int main(void) {
   if (!glfwInit()) {

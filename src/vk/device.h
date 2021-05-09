@@ -1,9 +1,13 @@
 
-#include <memory>
+#pragma once
 
+extern "C" {
 // Vulkan
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
+}
+
+#include <memory>
 
 namespace vk {
 
@@ -21,4 +25,4 @@ class Device {
   VkDevice Handle() const { return device_; }
 };
 
-} // namespace vk
+}  // namespace vk

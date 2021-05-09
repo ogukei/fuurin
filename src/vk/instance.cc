@@ -1,5 +1,5 @@
 
-#include "instance.h"
+#include "vk/instance.h"
 
 namespace vk {
 
@@ -9,9 +9,7 @@ std::shared_ptr<Instance> Instance::Create() {
   return instance;
 }
 
-Instance::Instance() {
-
-}
+Instance::Instance() {}
 
 void Instance::Initialize() {
   VkApplicationInfo app_info = {};
@@ -34,4 +32,4 @@ Instance::~Instance() {
   instance_ = nullptr;
 }
 
-} // namespace vk
+}  // namespace vk

@@ -1,5 +1,5 @@
 
-#include "video_demux.h"
+#include "video/video_demux.h"
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -22,8 +22,8 @@ class PacketReader {
   AVBSFContext* bsf_;
 
  public:
-  PacketReader(AVFormatContext* context, int stream_index) 
-    : context_(context), stream_index_(stream_index) {
+  PacketReader(AVFormatContext* context, int stream_index)
+      : context_(context), stream_index_(stream_index) {
     // packet
     packet_ = av_packet_alloc();
     av_init_packet(packet_);
@@ -73,6 +73,7 @@ class DemuxContext : public Demux {
   PacketReader* reader_;
 
   AVStream* stream_;
+
  public:
   DemuxContext(const DemuxContext&) = delete;
   DemuxContext() : reader_(nullptr) {
@@ -106,10 +107,10 @@ class DemuxContext : public Demux {
   virtual uint32_t Height() const { return (uint32_t)stream_->codecpar->height; }
 };
 
-} // namespace
+}  // namespace
 
 std::unique_ptr<Demux> CreateDemux() {
   return std::make_unique<DemuxContext>();
 }
 
-} // namespace video
+}  // namespace video

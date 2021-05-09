@@ -1,26 +1,26 @@
 
-#define VK_ENABLE_BETA_EXTENSIONS
-#include <vulkan/vulkan.h>
-#include "render.h"
+#include "app/render.h"
 
 extern "C" {
-#include <stdio.h>
+#define VK_ENABLE_BETA_EXTENSIONS
+#include <vulkan/vulkan.h>
 }
 
 #include <vector>
 #include <string>
 #include <optional>
+#include <memory>
 
-#include "instance.h"
-#include "physical_device.h"
-#include "device_queue.h"
-#include "device.h"
+#include "vk/instance.h"
+#include "vk/physical_device.h"
+#include "vk/device_queue.h"
+#include "vk/device.h"
 
-#include "video_demux.h"
-#include "video_decode_session.h"
+#include "video/video_demux.h"
+#include "video/video_decode_session.h"
 
 Render::Render() {
-  auto instance = vk::Instance::Create(); 
+  auto instance = vk::Instance::Create();
   auto physical_device = vk::PhysicalDevice::Create(instance);
   auto device_queue = vk::DeviceQueue::Create(physical_device).value();
   auto device = device_queue->Device();
