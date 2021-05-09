@@ -8,14 +8,14 @@
 namespace vk {
 
 std::shared_ptr<PhysicalDevice> PhysicalDevice::Create(
-    std::shared_ptr<Instance>& instance
+    std::shared_ptr<vk::Instance>& instance
 ) {
   auto physical_device = std::make_shared<PhysicalDevice>(instance);
   physical_device->Initialize();
   return physical_device;
 }
 
-PhysicalDevice::PhysicalDevice(std::shared_ptr<Instance>& instance) : instance_(instance) {
+PhysicalDevice::PhysicalDevice(std::shared_ptr<vk::Instance>& instance) : instance_(instance) {
 
 }
 

@@ -62,6 +62,8 @@ bool DeviceQueue::Initialize(const std::shared_ptr<DeviceQueue>& device_queue) {
     device_info.pQueueCreateInfos = &queue_info;
     // extensions
     std::vector<const char*> extension_names = {
+      "VK_KHR_video_queue",
+      "VK_KHR_video_decode_queue",
       "VK_EXT_video_decode_h264"
     };
     device_info.enabledExtensionCount = 1;

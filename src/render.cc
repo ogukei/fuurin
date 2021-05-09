@@ -17,6 +17,7 @@ extern "C" {
 #include "device.h"
 
 #include "video_demux.h"
+#include "video_decode_session.h"
 
 Render::Render() {
   auto instance = vk::Instance::Create(); 
@@ -25,5 +26,6 @@ Render::Render() {
   auto device = device_queue->Device();
   auto queue = device_queue->Queue();
 
-  auto demux = video::CreateDemux();
+  auto session = std::make_unique<vk::VideoDecodeSession>(device_queue);
+  session->Initialize();
 }

@@ -7,11 +7,13 @@
 
 namespace vk {
 
+class DeviceQueue;
+
 class VideoDecodeSession {
  private:
-  
+  std::shared_ptr<vk::DeviceQueue> device_queue_;
  public:
-  explicit VideoDecodeSession();
+  explicit VideoDecodeSession(const std::shared_ptr<vk::DeviceQueue>& device_queue);
   VideoDecodeSession(const VideoDecodeSession &) = delete;
   ~VideoDecodeSession();
 

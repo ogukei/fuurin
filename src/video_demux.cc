@@ -8,7 +8,6 @@ extern "C" {
 }
 
 #include <iostream>
-#include <cstdlib>
 
 namespace video {
 
@@ -72,7 +71,10 @@ class DemuxContext : public Demux {
  private:
   AVFormatContext* context_;
   PacketReader* reader_;
+
+  AVStream* stream_;
  public:
+  DemuxContext(const DemuxContext&) = delete;
   DemuxContext() : reader_(nullptr) {
     av_register_all();
     avformat_network_init();
@@ -90,18 +92,18 @@ class DemuxContext : public Demux {
     }
     auto* stream = context->streams[stream_index];
     context_ = context;
+    // @see https://ffmpeg.org/doxygen/2.8/structAVStream.html
+    stream_ = context->streams[stream_index];
     reader_ = new PacketReader(context, stream_index);
-
-    for (int i = 0; i < 100; i++) {
-      reader_->Next();
-      std::cout << reader_->Size() << std::endl;
-    }
   }
   virtual ~DemuxContext() {
+    stream_ = nullptr;
     delete reader_;
     reader_ = nullptr;
     avformat_close_input(&context_);
   }
+  virtual uint32_t Width() const { return (uint32_t)stream_->codecpar->width;  }
+  virtual uint32_t Height() const { return (uint32_t)stream_->codecpar->height; }
 };
 
 } // namespace
