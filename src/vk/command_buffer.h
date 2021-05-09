@@ -28,6 +28,7 @@ class CommandBuffer {
   ~CommandBuffer();
 
   VkCommandBuffer Handle() const { return command_buffer_; }
+  const std::shared_ptr<vk::CommandPool>& CommandPool() const { return command_pool_; }
 };
 
 }  // namespace vk

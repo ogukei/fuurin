@@ -24,7 +24,7 @@ class CommandRecord {
  public:
   static std::optional<std::shared_ptr<CommandRecord>> Begin(
     const std::shared_ptr<vk::CommandPool>& command_pool);
-  static std::optional<std::shared_ptr<CommandRecord>> BeginOneshot(
+  static std::optional<std::shared_ptr<CommandRecord>> BeginOnetimeSubmit(
     const std::shared_ptr<vk::CommandPool>& command_pool);
 
   std::shared_ptr<vk::CommandBuffer> End();
@@ -32,6 +32,8 @@ class CommandRecord {
   explicit CommandRecord(const std::shared_ptr<vk::CommandPool>& command_pool, bool is_oneshot);
   CommandRecord(const CommandRecord&) = delete;
   ~CommandRecord();
+
+  VkCommandBuffer CommandBuffer() const;
 };
 
 }  // namespace vk

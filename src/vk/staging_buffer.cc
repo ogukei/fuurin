@@ -1,8 +1,15 @@
 
 #include "vk/staging_buffer.h"
 
+#include <cstring>
+
+#include "vk/device.h"
+#include "vk/queue.h"
+#include "vk/device_queue.h"
 #include "vk/buffer_memory.h"
 #include "vk/command_pool.h"
+#include "vk/command_buffer.h"
+#include "vk/command_record.h"
 
 namespace vk {
 
@@ -19,7 +26,7 @@ StagingBuffer::StagingBuffer(
     const std::shared_ptr<vk::CommandPool>& command_pool,
     VkDeviceSize size,
     VkBufferUsageFlags buffer_usage_flags)
-    : command_pool_(command_pool) {
+    : command_pool_(command_pool), size_(size) {
   host_buffer_memory_ = vk::BufferMemory::Create(
     command_pool->DeviceQueue(),
     size,
@@ -33,11 +40,31 @@ StagingBuffer::StagingBuffer(
 }
 
 void StagingBuffer::Initialize() {
+  auto command_record = vk::CommandRecord::Begin(command_pool_).value();
+  VkBufferCopy copy = {};
+  copy.size = size_;
+  vkCmdCopyBuffer(command_record->CommandBuffer(),
+    host_buffer_memory_->Buffer(),
+    device_buffer_memory_->Buffer(),
+    1,
+    &copy);
+  copy_command_buffer_ = command_record->End();
+}
 
+void StagingBuffer::Write(void *data, size_t size) {
+  if (size != size_) return;
+  auto& device = command_pool_->DeviceQueue()->Device();
+  {
+    void *mapped = nullptr;
+    vkMapMemory(device->Handle(), host_buffer_memory_->Memory(), 0, size_, 0, &mapped);
+    std::memcpy(mapped, data, size);
+    vkUnmapMemory(device->Handle(), host_buffer_memory_->Memory());
+  }
+  auto& queue = command_pool_->DeviceQueue()->Queue();
+  queue->SubmitThenWait(copy_command_buffer_);
 }
 
 StagingBuffer::~StagingBuffer() {
-
 }
 
 }  // namespace vk

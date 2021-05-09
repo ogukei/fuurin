@@ -15,7 +15,7 @@ std::optional<std::shared_ptr<CommandRecord>> CommandRecord::Begin(
   return record;
 }
 
-std::optional<std::shared_ptr<CommandRecord>> CommandRecord::BeginOneshot(
+std::optional<std::shared_ptr<CommandRecord>> CommandRecord::BeginOnetimeSubmit(
     const std::shared_ptr<vk::CommandPool>& command_pool) {
   auto record = std::make_shared<CommandRecord>(command_pool, true);
   record->Initialize();
@@ -42,6 +42,10 @@ void CommandRecord::Initialize() {
 std::shared_ptr<vk::CommandBuffer> CommandRecord::End() {
   vkEndCommandBuffer(command_buffer_->Handle());
   return command_buffer_;
+}
+
+VkCommandBuffer CommandRecord::CommandBuffer() const {
+  return command_buffer_->Handle();
 }
 
 CommandRecord::~CommandRecord() {

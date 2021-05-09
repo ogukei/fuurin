@@ -47,6 +47,9 @@ class BufferMemory {
 
   BufferMemory(const BufferMemory&) = delete;
   ~BufferMemory();
+
+  VkBuffer Buffer() const { return buffer_; }
+  VkDeviceMemory Memory() const { return memory_; }
 };
 
 }  // namespace vk
