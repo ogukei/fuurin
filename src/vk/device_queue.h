@@ -22,14 +22,14 @@ class DeviceQueue {
   std::shared_ptr<vk::Queue> queue_;
   std::optional<uint32_t> queue_family_index_;
   std::shared_ptr<vk::Device> device_;
+
+  bool Initialize(const std::shared_ptr<DeviceQueue>&);
  public:
   static std::optional<std::shared_ptr<DeviceQueue>> Create(const std::shared_ptr<vk::PhysicalDevice>&);
 
   explicit DeviceQueue(const std::shared_ptr<vk::PhysicalDevice>&);
   DeviceQueue(const DeviceQueue&) = delete;
   ~DeviceQueue();
-
-  bool Initialize(const std::shared_ptr<DeviceQueue>&);
 
   uint32_t QueueFamilyIndex() const { return queue_family_index_.value(); }
 

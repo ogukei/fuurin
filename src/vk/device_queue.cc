@@ -12,11 +12,7 @@ namespace vk {
 std::optional<std::shared_ptr<DeviceQueue>> DeviceQueue::Create(
     const std::shared_ptr<vk::PhysicalDevice>& physical_device) {
   auto device_queue = std::make_shared<DeviceQueue>(physical_device);
-  if (device_queue->Initialize(device_queue)) {
-    return device_queue;
-  } else {
-    return std::nullopt;
-  }
+  return (device_queue->Initialize(device_queue)) ? std::optional {device_queue} : std::nullopt;
 }
 
 DeviceQueue::DeviceQueue(const std::shared_ptr<vk::PhysicalDevice>& physical_device)

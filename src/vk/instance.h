@@ -13,6 +13,8 @@ namespace vk {
 class Instance {
  private:
   VkInstance instance_;
+
+  void Initialize();
  public:
   static std::shared_ptr<Instance> Create();
 
@@ -20,7 +22,6 @@ class Instance {
   Instance(const Instance &) = delete;
   ~Instance();
 
-  void Initialize();
   VkInstance Handle() const { return instance_; }
 };
 
