@@ -26,6 +26,8 @@ class CommandPool {
   explicit CommandPool(const std::shared_ptr<vk::DeviceQueue>& device_queue);
   CommandPool(const CommandPool &) = delete;
   ~CommandPool();
+
+  VkCommandPool Handle() const { return command_pool_; }
 };
 
 }  // namespace vk
