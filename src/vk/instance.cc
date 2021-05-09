@@ -38,7 +38,7 @@ void Instance::Initialize() {
 }
 
 Instance::~Instance() {
-  // clear debug
+  // debug
   debug_utils_messenger_.reset(nullptr);
   // destroy
   vkDestroyInstance(instance_, nullptr);

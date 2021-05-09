@@ -22,7 +22,7 @@ class Instance {
   static std::shared_ptr<Instance> Create();
 
   Instance();
-  Instance(const Instance &) = delete;
+  Instance(const Instance&) = delete;
   ~Instance();
 
   VkInstance Handle() const { return instance_; }
