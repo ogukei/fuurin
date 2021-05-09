@@ -10,6 +10,7 @@
 #include "video_demux.h"
 
 #include <iostream>
+#include <vector>
 
 namespace vk {
 
@@ -27,15 +28,25 @@ static PFN_vkGetPhysicalDeviceVideoCapabilitiesKHR vk_vkGetPhysicalDeviceVideoCa
   return (PFN_vkGetPhysicalDeviceVideoCapabilitiesKHR)vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceVideoCapabilitiesKHR");
 }
 
+// @see https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCreateVideoSessionKHR.html
 static PFN_vkCreateVideoSessionKHR vk_vkCreateVideoSessionKHR(VkDevice device) {
     return (PFN_vkCreateVideoSessionKHR)vkGetDeviceProcAddr(device, "vkCreateVideoSessionKHR");
+}
+
+static PFN_vkDestroyVideoSessionKHR vk_vkDestroyVideoSessionKHR(VkDevice device) {
+    return (PFN_vkDestroyVideoSessionKHR)vkGetDeviceProcAddr(device, "vkDestroyVideoSessionKHR");
+}
+
+// @see https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkGetVideoSessionMemoryRequirementsKHR.html
+static PFN_vkGetVideoSessionMemoryRequirementsKHR vk_vkGetVideoSessionMemoryRequirementsKHR(VkDevice device) {
+    return (PFN_vkGetVideoSessionMemoryRequirementsKHR)vkGetDeviceProcAddr(device, "vkGetVideoSessionMemoryRequirementsKHR");
 }
 
 VideoDecodeSession::VideoDecodeSession(const std::shared_ptr<vk::DeviceQueue>& device_queue) : device_queue_(device_queue) {
 
 }
 
-void VideoDecodeSession::Initialize() {
+bool VideoDecodeSession::Initialize() {
   // assumes VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR
   // assumes VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM
   // assumes VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR
@@ -98,11 +109,49 @@ void VideoDecodeSession::Initialize() {
   };
   VkVideoSessionKHR video_session = nullptr;
   vk_vkCreateVideoSessionKHR(device->Handle())(device->Handle(), &session_create_info, nullptr, &video_session);
-  std::cout << video_session << std::endl;
+  if (video_session == nullptr) {
+    return false;
+  }
+  video_session_ = video_session;
+  // FIXME: vulkan session should NOT have video demux logic 
+  video_demux_ = std::move(demux);
+  // ------
+  Setup();
+  return true;
+}
+
+void VideoDecodeSession::Setup() {
+  auto& physical_device = device_queue_->PhysicalDevice();
+  auto& instance = physical_device->Instance();
+  auto& device = device_queue_->Device();
+
+  // @see https://github.com/nvpro-samples/vk_video_samples/blob/main/vk_video_decoder/libs/NvVkDecoder/NvVkDecoder.cpp
+  // first, retrieves required count
+  uint32_t video_requirements_count = 0;
+  vk_vkGetVideoSessionMemoryRequirementsKHR(device->Handle())(device->Handle(), video_session_, &video_requirements_count, nullptr);
+  // allocate
+  std::vector<VkVideoGetMemoryPropertiesKHR> video_properties_vec;
+  std::vector<VkMemoryRequirements2> memory_requirements_vec;
+  video_properties_vec.resize(video_requirements_count);
+  memory_requirements_vec.resize(video_requirements_count);
+  // associate
+  for (uint32_t i = 0; i < video_requirements_count; i++) {
+    VkMemoryRequirements2 *requirements = memory_requirements_vec.data() + (size_t)i;
+    VkVideoGetMemoryPropertiesKHR *properties = video_properties_vec.data() + (size_t)i;
+    requirements->sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
+    properties->sType = VK_STRUCTURE_TYPE_VIDEO_GET_MEMORY_PROPERTIES_KHR;
+    properties->pMemoryRequirements = requirements;
+  }
+  vk_vkGetVideoSessionMemoryRequirementsKHR(device->Handle())(device->Handle(), video_session_, &video_requirements_count, video_properties_vec.data());
+  //
+  //
+
 }
 
 VideoDecodeSession::~VideoDecodeSession() {
-
+  auto& device = device_queue_->Device();
+  vk_vkDestroyVideoSessionKHR(device->Handle())(device->Handle(), video_session_, nullptr);
+  video_session_ = nullptr;
 }
 
 } // namespace vk
