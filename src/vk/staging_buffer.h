@@ -25,6 +25,7 @@ class StagingBuffer {
   VkDeviceSize allocation_size_;
 
   void Initialize();
+
  public:
   static std::optional<std::shared_ptr<StagingBuffer>> Create(
     const std::shared_ptr<vk::CommandPool>& command_pool,
@@ -38,6 +39,8 @@ class StagingBuffer {
   ~StagingBuffer();
 
   void Write(void *data, size_t size);
+
+  VkBuffer DeviceBuffer() const;
 };
 
 }  // namespace vk

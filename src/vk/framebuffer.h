@@ -45,6 +45,9 @@ class Framebuffer {
   ~Framebuffer();
 
   const std::shared_ptr<vk::RenderPass>& RenderPass() const { return render_pass_; }
+  VkFramebuffer Handle() const { return framebuffer_; }
+  uint32_t Width() const { return width_; }
+  uint32_t Height() const { return height_; }
 };
 
 }  // namespace vk

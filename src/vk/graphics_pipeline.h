@@ -34,6 +34,10 @@ class GraphicsPipeline {
     const std::shared_ptr<vk::Framebuffer>& framebuffer);
   GraphicsPipeline(const GraphicsPipeline&) = delete;
   ~GraphicsPipeline();
+
+  const std::shared_ptr<vk::Framebuffer>& Framebuffer() const { return framebuffer_; }
+  VkPipeline Handle() const { return pipeline_; }
+  VkPipelineLayout Layout() const { return pipeline_layout_; }
 };
 
 }  // namespace vk

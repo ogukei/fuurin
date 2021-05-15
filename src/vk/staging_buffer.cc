@@ -71,6 +71,10 @@ void StagingBuffer::Write(void *data, size_t size) {
   queue->SubmitThenWait(copy_command_buffer_);
 }
 
+VkBuffer StagingBuffer::DeviceBuffer() const {
+  return device_buffer_memory_->Buffer();
+}
+
 StagingBuffer::~StagingBuffer() {
 }
 

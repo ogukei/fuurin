@@ -21,6 +21,8 @@ extern "C" {
 #include "vk/framebuffer.h"
 #include "vk/shader_module.h"
 #include "vk/graphics_pipeline.h"
+#include "vk/graphics_state.h"
+#include "vk/graphics_render.h"
 
 #include "video/video_demux.h"
 #include "video/video_decode_session.h"
@@ -36,26 +38,9 @@ Render::Render() {
   auto session = std::make_unique<vk::VideoDecodeSession>(device_queue);
   session->Initialize();
 
-  // vertices
-  std::vector<float> vertices = {
-    1.0f, 1.0f, 0.0f,
-    1.0f, 0.0f, 0.0f,
-    -1.0f,  1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, -1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f
-  };
-  size_t vertices_size = vertices.size() * sizeof(float);
-  auto vertices_staging_buffer = vk::StagingBuffer::Create(
-    command_pool, vertices_size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT).value();
-  vertices_staging_buffer->Write(vertices.data(), vertices_size);
-  // indices
-  std::vector<uint32_t> indices = {0, 1, 2};
-  size_t indices_size = indices.size() * sizeof(uint32_t);
-  auto indices_staging_buffer = vk::StagingBuffer::Create(
-    command_pool, indices_size, VK_BUFFER_USAGE_INDEX_BUFFER_BIT).value();
-  indices_staging_buffer->Write(indices.data(), indices_size);
-
   auto framebuffer = vk::Framebuffer::Create(device, 1280, 720);
   auto graphics_pipeline = vk::GraphicsPipeline::Create(device, framebuffer);
+  auto graphics_state = vk::GraphicsState::Create(command_pool);
+  auto graphics_render = vk::GraphicsRender::Create(command_pool, graphics_pipeline, graphics_state);
+  graphics_render->Render();
 }
