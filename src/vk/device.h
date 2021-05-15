@@ -23,6 +23,7 @@ class Device {
 
   void Initialize(VkDevice device);
   VkDevice Handle() const { return device_; }
+  const std::shared_ptr<vk::DeviceQueue>& DeviceQueue() const { return device_queue_; }
 };
 
 }  // namespace vk

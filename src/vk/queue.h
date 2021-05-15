@@ -12,6 +12,7 @@ extern "C" {
 namespace vk {
 
 class DeviceQueue;
+class CommandBuffer;
 
 class Queue {
  private:
@@ -22,6 +23,8 @@ class Queue {
 
   void Initialize(VkQueue queue);
   uint32_t FamilyIndex() const;
+
+  void SubmitThenWait(const std::shared_ptr<CommandBuffer>&);
 };
 
 }  // namespace vk

@@ -16,6 +16,8 @@ class PhysicalDevice {
  private:
   std::shared_ptr<vk::Instance> instance_;
   VkPhysicalDevice physical_device_;
+
+  void Initialize();
  public:
   static std::shared_ptr<PhysicalDevice> Create(
     const std::shared_ptr<Instance>& instance);
@@ -25,7 +27,6 @@ class PhysicalDevice {
   PhysicalDevice(const PhysicalDevice&) = delete;
   ~PhysicalDevice();
 
-  void Initialize();
   VkPhysicalDevice Handle() const { return physical_device_; }
   const std::shared_ptr<vk::Instance>& Instance() const { return instance_; }
 };

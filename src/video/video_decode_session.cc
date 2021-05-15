@@ -140,8 +140,8 @@ void VideoDecodeSession::Setup() {
   memory_requirements_vec.resize(video_requirements_count);
   // associate
   for (uint32_t i = 0; i < video_requirements_count; i++) {
-    VkMemoryRequirements2 *requirements = memory_requirements_vec.data() + (size_t)i;
-    VkVideoGetMemoryPropertiesKHR *properties = video_properties_vec.data() + (size_t)i;
+    VkMemoryRequirements2* requirements = memory_requirements_vec.data() + (size_t)i;
+    VkVideoGetMemoryPropertiesKHR* properties = video_properties_vec.data() + (size_t)i;
     requirements->sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
     properties->sType = VK_STRUCTURE_TYPE_VIDEO_GET_MEMORY_PROPERTIES_KHR;
     properties->pMemoryRequirements = requirements;

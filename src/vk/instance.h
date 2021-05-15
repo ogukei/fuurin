@@ -10,17 +10,21 @@ extern "C" {
 
 namespace vk {
 
+class DebugUtilsMessenger;
+
 class Instance {
  private:
   VkInstance instance_;
+  std::unique_ptr<DebugUtilsMessenger> debug_utils_messenger_;
+
+  void Initialize();
  public:
   static std::shared_ptr<Instance> Create();
 
   Instance();
-  Instance(const Instance &) = delete;
+  Instance(const Instance&) = delete;
   ~Instance();
 
-  void Initialize();
   VkInstance Handle() const { return instance_; }
 };
 

@@ -10,11 +10,20 @@ extern "C" {
 #include <string>
 #include <optional>
 #include <memory>
+#include <iostream>
 
 #include "vk/instance.h"
 #include "vk/physical_device.h"
 #include "vk/device_queue.h"
 #include "vk/device.h"
+#include "vk/command_pool.h"
+#include "vk/staging_buffer.h"
+#include "vk/framebuffer.h"
+#include "vk/shader_module.h"
+#include "vk/graphics_pipeline.h"
+#include "vk/graphics_state.h"
+#include "vk/graphics_render.h"
+#include "vk/offscreen_render.h"
 
 #include "video/video_demux.h"
 #include "video/video_decode_session.h"
@@ -25,7 +34,18 @@ Render::Render() {
   auto device_queue = vk::DeviceQueue::Create(physical_device).value();
   auto device = device_queue->Device();
   auto queue = device_queue->Queue();
+  auto command_pool = vk::CommandPool::Create(device_queue).value();
 
   auto session = std::make_unique<vk::VideoDecodeSession>(device_queue);
   session->Initialize();
+
+  auto framebuffer = vk::Framebuffer::Create(device, 1280, 720);
+  auto graphics_pipeline = vk::GraphicsPipeline::Create(device, framebuffer);
+  auto graphics_state = vk::GraphicsState::Create(command_pool);
+  auto graphics_render = vk::GraphicsRender::Create(command_pool, graphics_pipeline, graphics_state);
+  graphics_render->Execute();
+
+  auto offscreen_render = vk::OffscreenRender::Create(command_pool, framebuffer);
+  offscreen_render->Execute();
+  offscreen_render->Save("out.ppm");
 }

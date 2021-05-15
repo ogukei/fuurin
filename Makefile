@@ -1,5 +1,5 @@
 
-# dependencies: libglfw3 libglfw3-dev libavformat-dev libavcodec-dev
+# dependencies: libglfw3 libglfw3-dev libavformat-dev libavcodec-dev libglm-dev
 
 TARGET=main
 
