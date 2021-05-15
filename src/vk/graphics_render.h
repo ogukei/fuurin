@@ -38,7 +38,7 @@ class GraphicsRender {
   GraphicsRender(const GraphicsRender&) = delete;
   ~GraphicsRender();
 
-  void Render();
+  void Execute();
 };
 
 }  // namespace vk

@@ -2,7 +2,6 @@
 #include "vk/image.h"
 
 #include "vk/device.h"
-#include "vk/image_memory.h"
 
 namespace vk {
 
@@ -11,8 +10,9 @@ std::shared_ptr<Image> Image::Create(
     uint32_t width,
     uint32_t height,
     VkFormat format,
-    VkImageUsageFlags usage) {
-  auto image = std::make_shared<Image>(device, width, height, format, usage);
+    VkImageUsageFlags usage,
+    VkImageTiling tiling) {
+  auto image = std::make_shared<Image>(device, width, height, format, usage, tiling);
   image->Initialize();
   return image;
 }
@@ -22,10 +22,12 @@ Image::Image(
     uint32_t width,
     uint32_t height,
     VkFormat format,
-    VkImageUsageFlags usage)
+    VkImageUsageFlags usage,
+    VkImageTiling tiling)
     : width_(width),
       height_(height),
       format_(format),
+      tiling_(tiling),
       usage_(usage),
       image_(nullptr),
       device_(device) {
@@ -46,7 +48,7 @@ void Image::Initialize() {
     .mipLevels = 1,
     .arrayLayers = 1,
     .samples = VK_SAMPLE_COUNT_1_BIT,
-    .tiling = VK_IMAGE_TILING_OPTIMAL,
+    .tiling = tiling_,
     .usage = usage_,
     .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
     .queueFamilyIndexCount = 0,
@@ -56,8 +58,6 @@ void Image::Initialize() {
   VkImage image = nullptr;
   vkCreateImage(device_->Handle(), &create_info, nullptr, &image);
   image_ = image;
-  // image memory
-  image_memory_ = ImageMemory::Create(image, device_);
 }
 
 Image::~Image() {

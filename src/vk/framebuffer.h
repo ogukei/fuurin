@@ -12,6 +12,7 @@ namespace vk {
 
 class Device;
 class Image;
+class ImageMemory;
 class ImageView;
 class RenderPass;
 
@@ -22,8 +23,10 @@ class Framebuffer {
   uint32_t height_;
   // attachments
   std::shared_ptr<vk::Image> color_image_;
+  std::shared_ptr<vk::ImageMemory> color_image_memory_;
   std::shared_ptr<vk::ImageView> color_image_view_;
   std::shared_ptr<vk::Image> depth_image_;
+  std::shared_ptr<vk::ImageMemory> depth_image_memory_;
   std::shared_ptr<vk::ImageView> depth_image_view_;
   std::shared_ptr<vk::RenderPass> render_pass_;
   // handle
@@ -48,6 +51,9 @@ class Framebuffer {
   VkFramebuffer Handle() const { return framebuffer_; }
   uint32_t Width() const { return width_; }
   uint32_t Height() const { return height_; }
+
+  const std::shared_ptr<vk::Device>& Device() const { return device_; }
+  const std::shared_ptr<vk::Image>& ColorImage() const { return color_image_; }
 };
 
 }  // namespace vk

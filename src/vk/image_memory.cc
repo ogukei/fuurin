@@ -8,16 +8,23 @@
 
 namespace vk {
 
-std::shared_ptr<ImageMemory> ImageMemory::Create(VkImage image, const std::shared_ptr<vk::Device>& device) {
-  auto image_memory = std::make_shared<ImageMemory>(image, device);
+std::shared_ptr<ImageMemory> ImageMemory::Create(
+    const std::shared_ptr<vk::Device>& device,
+    VkImage image,
+    VkMemoryPropertyFlags memory_property_flags) {
+  auto image_memory = std::make_shared<ImageMemory>(device, image, memory_property_flags);
   image_memory->Initialize();
   return image_memory;
 }
 
-ImageMemory::ImageMemory(VkImage image, const std::shared_ptr<vk::Device>& device)
+ImageMemory::ImageMemory(
+    const std::shared_ptr<vk::Device>& device,
+    VkImage image,
+    VkMemoryPropertyFlags memory_property_flags)
     : image_(image),
       device_(device),
-      memory_(nullptr) {
+      memory_(nullptr),
+      memory_property_flags_(memory_property_flags) {
 }
 
 void ImageMemory::Initialize() {
@@ -29,7 +36,7 @@ void ImageMemory::Initialize() {
   uint32_t memoryTypeIndex = vk::MemoryTypeIndex(
     physical_device,
     memory_requirements.memoryTypeBits,
-    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT).value();
+    memory_property_flags_).value();
   // allocation
   VkDeviceSize allocation_size = memory_requirements.size;
   VkMemoryAllocateInfo allocate_info = {

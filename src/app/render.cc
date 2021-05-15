@@ -23,6 +23,7 @@ extern "C" {
 #include "vk/graphics_pipeline.h"
 #include "vk/graphics_state.h"
 #include "vk/graphics_render.h"
+#include "vk/offscreen_render.h"
 
 #include "video/video_demux.h"
 #include "video/video_decode_session.h"
@@ -42,5 +43,9 @@ Render::Render() {
   auto graphics_pipeline = vk::GraphicsPipeline::Create(device, framebuffer);
   auto graphics_state = vk::GraphicsState::Create(command_pool);
   auto graphics_render = vk::GraphicsRender::Create(command_pool, graphics_pipeline, graphics_state);
-  graphics_render->Render();
+  graphics_render->Execute();
+
+  auto offscreen_render = vk::OffscreenRender::Create(command_pool, framebuffer);
+  offscreen_render->Execute();
+  offscreen_render->Save("out.ppm");
 }

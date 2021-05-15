@@ -35,7 +35,12 @@ void Framebuffer::Initialize() {
     width_,
     height_,
     VK_FORMAT_R8G8B8A8_UNORM,
-    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+    VK_IMAGE_TILING_OPTIMAL);
+  color_image_memory_ = ImageMemory::Create(
+    device_,
+    color_image_->Handle(),
+    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
   color_image_view_ = ImageView::Create(
     device_,
     color_image_->Handle(),
@@ -47,7 +52,12 @@ void Framebuffer::Initialize() {
     width_,
     height_,
     VK_FORMAT_D32_SFLOAT,
-    VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+    VK_IMAGE_TILING_OPTIMAL);
+  depth_image_memory_ = ImageMemory::Create(
+    device_,
+    depth_image_->Handle(),
+    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
   depth_image_view_ = ImageView::Create(
     device_,
     depth_image_->Handle(),

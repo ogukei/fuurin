@@ -123,7 +123,7 @@ void GraphicsRender::Initialize() {
   command_buffer_ = command_record->End();
 }
 
-void GraphicsRender::Render() {
+void GraphicsRender::Execute() {
   auto& queue = command_pool_->DeviceQueue()->Queue();
   queue->SubmitThenWait(command_buffer_);
 }

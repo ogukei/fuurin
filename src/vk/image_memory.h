@@ -17,15 +17,24 @@ class ImageMemory {
   void Initialize();
   VkImage image_;
   VkDeviceMemory memory_;
+  VkMemoryPropertyFlags memory_property_flags_;
+
   std::shared_ptr<vk::Device> device_;
  public:
   static std::shared_ptr<ImageMemory> Create(
+    const std::shared_ptr<vk::Device>& device,
     VkImage image,
-    const std::shared_ptr<vk::Device>& device);
+    VkMemoryPropertyFlags memory_property_flags);
 
-  explicit ImageMemory(VkImage image, const std::shared_ptr<vk::Device>& device);
+  explicit ImageMemory(
+    const std::shared_ptr<vk::Device>& device,
+    VkImage image,
+    VkMemoryPropertyFlags memory_property_flags);
+
   ImageMemory(const ImageMemory&) = delete;
   ~ImageMemory();
+
+  VkDeviceMemory Handle() const { return memory_; }
 };
 
 }  // namespace vk

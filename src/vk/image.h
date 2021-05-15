@@ -19,9 +19,9 @@ class Image {
   uint32_t height_;
   VkImageUsageFlags usage_;
   VkFormat format_;
+  VkImageTiling tiling_;
   VkImage image_;
   std::shared_ptr<vk::Device> device_;
-  std::shared_ptr<vk::ImageMemory> image_memory_;
 
   void Initialize();
 
@@ -31,19 +31,20 @@ class Image {
     uint32_t width,
     uint32_t height,
     VkFormat format,
-    VkImageUsageFlags usage);
+    VkImageUsageFlags usage,
+    VkImageTiling tiling);
 
   explicit Image(
     const std::shared_ptr<vk::Device>& device,
     uint32_t width,
     uint32_t height,
     VkFormat format,
-    VkImageUsageFlags usage);
+    VkImageUsageFlags usage,
+    VkImageTiling tiling);
   Image(const Image&) = delete;
   ~Image();
 
   VkImage Handle() const { return image_; }
-  const std::shared_ptr<vk::ImageMemory>& ImageMemory() const { return image_memory_; }
 };
 
 }  // namespace vk
