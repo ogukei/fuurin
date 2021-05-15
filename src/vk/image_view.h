@@ -36,6 +36,8 @@ class ImageView {
 
   ImageView(const ImageView&) = delete;
   ~ImageView();
+
+  VkImageView Handle() const { return image_view_; }
 };
 
 }  // namespace vk

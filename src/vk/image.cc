@@ -10,23 +10,23 @@ std::shared_ptr<Image> Image::Create(
     const std::shared_ptr<vk::Device>& device,
     uint32_t width,
     uint32_t height,
-    VkImageUsageFlags usage,
-    VkFormat format) {
-  auto instance = std::make_shared<Image>(device, width, height, usage, format);
-  instance->Initialize();
-  return instance;
+    VkFormat format,
+    VkImageUsageFlags usage) {
+  auto image = std::make_shared<Image>(device, width, height, format, usage);
+  image->Initialize();
+  return image;
 }
 
 Image::Image(
     const std::shared_ptr<vk::Device>& device,
     uint32_t width,
     uint32_t height,
-    VkImageUsageFlags usage,
-    VkFormat format)
+    VkFormat format,
+    VkImageUsageFlags usage)
     : width_(width),
       height_(height),
-      usage_(usage),
       format_(format),
+      usage_(usage),
       image_(nullptr),
       device_(device) {
 }
@@ -62,6 +62,7 @@ void Image::Initialize() {
 
 Image::~Image() {
   vkDestroyImage(device_->Handle(), image_, nullptr);
+  image_ = nullptr;
 }
 
 }  // namespace vk

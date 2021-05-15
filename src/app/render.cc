@@ -17,6 +17,7 @@ extern "C" {
 #include "vk/device.h"
 #include "vk/command_pool.h"
 #include "vk/staging_buffer.h"
+#include "vk/framebuffer.h"
 
 #include "video/video_demux.h"
 #include "video/video_decode_session.h"
@@ -51,4 +52,6 @@ Render::Render() {
   auto indices_staging_buffer = vk::StagingBuffer::Create(
     command_pool, indices_size, VK_BUFFER_USAGE_INDEX_BUFFER_BIT).value();
   indices_staging_buffer->Write(indices.data(), indices_size);
+
+  auto framebuffer = vk::Framebuffer::Create(device, 1280, 720);
 }

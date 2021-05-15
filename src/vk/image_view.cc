@@ -13,9 +13,9 @@ std::shared_ptr<ImageView> ImageView::Create(
     VkImage image,
     VkFormat format,
     VkImageAspectFlags aspect_mask) {
-  auto instance = std::make_shared<ImageView>(device, image, format, aspect_mask);
-  instance->Initialize();
-  return instance;
+  auto image_view = std::make_shared<ImageView>(device, image, format, aspect_mask);
+  image_view->Initialize();
+  return image_view;
 }
 
 ImageView::ImageView(
@@ -54,6 +54,7 @@ void ImageView::Initialize() {
 
 ImageView::~ImageView() {
   vkDestroyImageView(device_->Handle(), image_view_, nullptr);
+  image_view_ = nullptr;
 }
 
 }  // namespace vk

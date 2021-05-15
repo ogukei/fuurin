@@ -30,15 +30,15 @@ class Image {
     const std::shared_ptr<vk::Device>& device,
     uint32_t width,
     uint32_t height,
-    VkImageUsageFlags usage,
-    VkFormat format);
+    VkFormat format,
+    VkImageUsageFlags usage);
 
   explicit Image(
     const std::shared_ptr<vk::Device>& device,
     uint32_t width,
     uint32_t height,
-    VkImageUsageFlags usage,
-    VkFormat format);
+    VkFormat format,
+    VkImageUsageFlags usage);
   Image(const Image&) = delete;
   ~Image();
 

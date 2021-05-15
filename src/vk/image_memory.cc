@@ -9,9 +9,9 @@
 namespace vk {
 
 std::shared_ptr<ImageMemory> ImageMemory::Create(VkImage image, const std::shared_ptr<vk::Device>& device) {
-  auto instance = std::make_shared<ImageMemory>(image, device);
-  instance->Initialize();
-  return instance;
+  auto image_memory = std::make_shared<ImageMemory>(image, device);
+  image_memory->Initialize();
+  return image_memory;
 }
 
 ImageMemory::ImageMemory(VkImage image, const std::shared_ptr<vk::Device>& device)
