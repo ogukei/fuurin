@@ -32,5 +32,23 @@ Render::Render() {
   auto session = std::make_unique<vk::VideoDecodeSession>(device_queue);
   session->Initialize();
 
-  auto staging_buffer = vk::StagingBuffer::Create(command_pool, 1024, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+  // vertices
+  std::vector<float> vertices = {
+    1.0f, 1.0f, 0.0f,
+    1.0f, 0.0f, 0.0f,
+    -1.0f,  1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, -1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f
+  };
+  size_t vertices_size = vertices.size() * sizeof(float);
+  auto vertices_staging_buffer = vk::StagingBuffer::Create(
+    command_pool, vertices_size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT).value();
+  vertices_staging_buffer->Write(vertices.data(), vertices_size);
+  // indices
+  std::vector<uint32_t> indices = {0, 1, 2};
+  size_t indices_size = indices.size() * sizeof(uint32_t);
+  auto indices_staging_buffer = vk::StagingBuffer::Create(
+    command_pool, indices_size, VK_BUFFER_USAGE_INDEX_BUFFER_BIT).value();
+  indices_staging_buffer->Write(indices.data(), indices_size);
 }

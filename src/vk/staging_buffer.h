@@ -22,6 +22,7 @@ class StagingBuffer {
   std::shared_ptr<vk::BufferMemory> device_buffer_memory_;
   std::shared_ptr<vk::CommandBuffer> copy_command_buffer_;
   VkDeviceSize size_;
+  VkDeviceSize allocation_size_;
 
   void Initialize();
  public:

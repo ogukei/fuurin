@@ -16,7 +16,7 @@ class DeviceQueue;
 class PhysicalDevice;
 
 std::optional<uint32_t> MemoryTypeIndex(
-    const std::shared_ptr<vk::PhysicalDevice> physical_device,
+    const std::shared_ptr<vk::PhysicalDevice>& physical_device,
     uint32_t type_bits,
     VkMemoryPropertyFlags property_flags);
 

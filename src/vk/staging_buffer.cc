@@ -1,7 +1,9 @@
 
 #include "vk/staging_buffer.h"
 
+#include <iostream>
 #include <cstring>
+#include <algorithm>
 
 #include "vk/device.h"
 #include "vk/queue.h"
@@ -26,15 +28,17 @@ StagingBuffer::StagingBuffer(
     const std::shared_ptr<vk::CommandPool>& command_pool,
     VkDeviceSize size,
     VkBufferUsageFlags buffer_usage_flags)
-    : command_pool_(command_pool), size_(size) {
+    : command_pool_(command_pool),
+      size_(size),
+      allocation_size_(std::max(size, (VkDeviceSize)0x100)) {
   host_buffer_memory_ = vk::BufferMemory::Create(
     command_pool->DeviceQueue(),
-    size,
+    allocation_size_,
     VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT).value();
   device_buffer_memory_ = vk::BufferMemory::Create(
     command_pool->DeviceQueue(),
-    size,
+    allocation_size_,
     buffer_usage_flags | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT).value();
 }
@@ -52,7 +56,10 @@ void StagingBuffer::Initialize() {
 }
 
 void StagingBuffer::Write(void *data, size_t size) {
-  if (size != size_) return;
+  if (size != size_) {
+    std::cout << "WARNING: mismatched size at StagingBuffer::Write()" << std::endl;
+    return;
+  }
   auto& device = command_pool_->DeviceQueue()->Device();
   {
     void *mapped = nullptr;

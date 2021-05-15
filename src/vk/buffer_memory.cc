@@ -8,7 +8,7 @@
 namespace vk {
 
 std::optional<uint32_t> MemoryTypeIndex(
-    const std::shared_ptr<vk::PhysicalDevice> physical_device,
+    const std::shared_ptr<vk::PhysicalDevice>& physical_device,
     uint32_t memory_type_bits,
     VkMemoryPropertyFlags property_flags) {
   VkPhysicalDeviceMemoryProperties properties = {};
