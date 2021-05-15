@@ -10,6 +10,7 @@ extern "C" {
 #include <string>
 #include <optional>
 #include <memory>
+#include <iostream>
 
 #include "vk/instance.h"
 #include "vk/physical_device.h"
@@ -18,6 +19,8 @@ extern "C" {
 #include "vk/command_pool.h"
 #include "vk/staging_buffer.h"
 #include "vk/framebuffer.h"
+#include "vk/shader_module.h"
+#include "vk/graphics_pipeline.h"
 
 #include "video/video_demux.h"
 #include "video/video_decode_session.h"
@@ -54,4 +57,5 @@ Render::Render() {
   indices_staging_buffer->Write(indices.data(), indices_size);
 
   auto framebuffer = vk::Framebuffer::Create(device, 1280, 720);
+  auto graphics_pipeline = vk::GraphicsPipeline::Create(device, framebuffer);
 }

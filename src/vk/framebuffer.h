@@ -43,6 +43,8 @@ class Framebuffer {
     uint32_t height);
   Framebuffer(const Framebuffer&) = delete;
   ~Framebuffer();
+
+  const std::shared_ptr<vk::RenderPass>& RenderPass() const { return render_pass_; }
 };
 
 }  // namespace vk
