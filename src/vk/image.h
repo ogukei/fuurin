@@ -10,17 +10,40 @@ extern "C" {
 
 namespace vk {
 
-class ColorImage {
+class Device;
+class ImageMemory;
+
+class Image {
  private:
   uint32_t width_;
   uint32_t height_;
-  void Initialize();
- public:
-  static std::shared_ptr<ColorImage> Create(uint32_t width, uint32_t height);
+  VkImageUsageFlags usage_;
+  VkFormat format_;
+  VkImage image_;
+  std::shared_ptr<vk::Device> device_;
+  std::shared_ptr<vk::ImageMemory> image_memory_;
 
-  explicit ColorImage(uint32_t width, uint32_t height);
-  ColorImage(const ColorImage&) = delete;
-  ~ColorImage();
+  void Initialize();
+
+ public:
+  static std::shared_ptr<Image> Create(
+    const std::shared_ptr<vk::Device>& device,
+    uint32_t width,
+    uint32_t height,
+    VkImageUsageFlags usage,
+    VkFormat format);
+
+  explicit Image(
+    const std::shared_ptr<vk::Device>& device,
+    uint32_t width,
+    uint32_t height,
+    VkImageUsageFlags usage,
+    VkFormat format);
+  Image(const Image&) = delete;
+  ~Image();
+
+  VkImage Handle() const { return image_; }
+  const std::shared_ptr<vk::ImageMemory>& ImageMemory() const { return image_memory_; }
 };
 
 }  // namespace vk

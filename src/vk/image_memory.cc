@@ -15,7 +15,9 @@ std::shared_ptr<ImageMemory> ImageMemory::Create(VkImage image, const std::share
 }
 
 ImageMemory::ImageMemory(VkImage image, const std::shared_ptr<vk::Device>& device)
-  : image_(image), device_(device), memory_(nullptr) {
+    : image_(image),
+      device_(device),
+      memory_(nullptr) {
 }
 
 void ImageMemory::Initialize() {
