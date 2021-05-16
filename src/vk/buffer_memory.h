@@ -12,7 +12,8 @@ extern "C" {
 
 namespace vk {
 
-class DeviceQueue;
+class Device;
+class Queue;
 class PhysicalDevice;
 
 std::optional<uint32_t> MemoryTypeIndex(
@@ -22,7 +23,8 @@ std::optional<uint32_t> MemoryTypeIndex(
 
 class BufferMemory {
  private:
-  std::shared_ptr<vk::DeviceQueue> device_queue_;
+  std::shared_ptr<vk::Device> device_;
+  std::shared_ptr<vk::Queue> queue_;
   VkDeviceSize size_;
   VkBufferUsageFlags buffer_usage_flags_;
   VkMemoryPropertyFlags memory_property_flags_;
@@ -34,16 +36,18 @@ class BufferMemory {
 
  public:
   static std::optional<std::shared_ptr<BufferMemory>> Create(
-      const std::shared_ptr<vk::DeviceQueue>& device_queue,
-      VkDeviceSize size,
-      VkBufferUsageFlags buffer_usage_flags,
-      VkMemoryPropertyFlags memory_property_flags);
+    const std::shared_ptr<vk::Device>& device,
+    const std::shared_ptr<vk::Queue>& queue,
+    VkDeviceSize size,
+    VkBufferUsageFlags buffer_usage_flags,
+    VkMemoryPropertyFlags memory_property_flags);
 
   explicit BufferMemory(
-      const std::shared_ptr<vk::DeviceQueue>& device_queue,
-      VkDeviceSize size,
-      VkBufferUsageFlags buffer_usage_flags,
-      VkMemoryPropertyFlags memory_property_flags);
+    const std::shared_ptr<vk::Device>& device,
+    const std::shared_ptr<vk::Queue>& queue,
+    VkDeviceSize size,
+    VkBufferUsageFlags buffer_usage_flags,
+    VkMemoryPropertyFlags memory_property_flags);
 
   BufferMemory(const BufferMemory&) = delete;
   ~BufferMemory();

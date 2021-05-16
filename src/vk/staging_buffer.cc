@@ -32,12 +32,14 @@ StagingBuffer::StagingBuffer(
       size_(size),
       allocation_size_(std::max(size, (VkDeviceSize)0x100)) {
   host_buffer_memory_ = vk::BufferMemory::Create(
-    command_pool->DeviceQueue(),
+    command_pool->Device(),
+    command_pool->Queue(),
     allocation_size_,
     VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT).value();
   device_buffer_memory_ = vk::BufferMemory::Create(
-    command_pool->DeviceQueue(),
+    command_pool->Device(),
+    command_pool->Queue(),
     allocation_size_,
     buffer_usage_flags | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT).value();
@@ -60,14 +62,14 @@ void StagingBuffer::Write(void *data, size_t size) {
     std::cout << "WARNING: mismatched size at StagingBuffer::Write()" << std::endl;
     return;
   }
-  auto& device = command_pool_->DeviceQueue()->Device();
+  auto& device = command_pool_->Device();
   {
     void *mapped = nullptr;
     vkMapMemory(device->Handle(), host_buffer_memory_->Memory(), 0, size_, 0, &mapped);
     std::memcpy(mapped, data, size);
     vkUnmapMemory(device->Handle(), host_buffer_memory_->Memory());
   }
-  auto& queue = command_pool_->DeviceQueue()->Queue();
+  auto& queue = command_pool_->Queue();
   queue->SubmitThenWait(copy_command_buffer_);
 }
 

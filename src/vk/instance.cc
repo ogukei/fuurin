@@ -1,6 +1,8 @@
 
 #include "vk/instance.h"
 
+#include <iostream>
+
 #include "vk/debug.h"
 
 namespace vk {

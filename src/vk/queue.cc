@@ -8,12 +8,8 @@
 
 namespace vk {
 
-Queue::Queue(const std::shared_ptr<DeviceQueue>& device_queue)
-    : queue_(nullptr), device_queue_(device_queue) {
-}
-
-uint32_t Queue::FamilyIndex() const {
-  return device_queue_->QueueFamilyIndex();
+Queue::Queue(const std::shared_ptr<DeviceQueue>& device_queue, uint32_t family_index)
+    : queue_(nullptr), device_queue_(device_queue), family_index_(family_index) {
 }
 
 void Queue::Initialize(VkQueue queue) {
@@ -21,7 +17,7 @@ void Queue::Initialize(VkQueue queue) {
 }
 
 void Queue::SubmitThenWait(const std::shared_ptr<CommandBuffer>& command_buffer) {
-  auto& device = command_buffer->CommandPool()->DeviceQueue()->Device();
+  auto& device = command_buffer->CommandPool()->Device();
   VkCommandBuffer command_buffer_handle = command_buffer->Handle();
   VkSubmitInfo submit_info = {
     .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,

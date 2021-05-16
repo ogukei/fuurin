@@ -30,7 +30,7 @@ VideoSessionMemory::VideoSessionMemory(
 }
 
 void VideoSessionMemory::Initialize() {
-  auto& physical_device = device_->DeviceQueue()->PhysicalDevice();
+  auto& physical_device = device_->PhysicalDevice();
   // memory type index
   // the sample app does not check this.
   // @see https://github.com/nvpro-samples/vk_video_samples/blob/058d03f6c432053ee3e7428f3f543be90eec947c/vk_video_decoder/libs/VkCodecUtils/VulkanVideoUtils.cpp#L432

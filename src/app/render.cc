@@ -34,8 +34,7 @@ Render::Render() {
   auto physical_device = vk::PhysicalDevice::Create(instance);
   auto device_queue = vk::DeviceQueue::Create(physical_device).value();
   auto device = device_queue->Device();
-  auto queue = device_queue->Queue();
-  auto command_pool = vk::CommandPool::Create(device_queue).value();
+  auto command_pool = vk::CommandPool::Create(device, device_queue->GraphicsQueue()).value();
 
   auto session = std::make_unique<vk::VideoDecodeSession>(device_queue);
   session->Initialize();

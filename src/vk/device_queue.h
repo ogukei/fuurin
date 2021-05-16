@@ -19,8 +19,8 @@ class Device;
 class DeviceQueue {
  private:
   std::shared_ptr<vk::PhysicalDevice> physical_device_;
-  std::shared_ptr<vk::Queue> queue_;
-  std::optional<uint32_t> queue_family_index_;
+  std::shared_ptr<vk::Queue> graphics_queue_;
+  std::shared_ptr<vk::Queue> video_queue_;
   std::shared_ptr<vk::Device> device_;
 
   bool Initialize(const std::shared_ptr<DeviceQueue>&);
@@ -31,11 +31,11 @@ class DeviceQueue {
   DeviceQueue(const DeviceQueue&) = delete;
   ~DeviceQueue();
 
-  uint32_t QueueFamilyIndex() const { return queue_family_index_.value(); }
-
   const std::shared_ptr<vk::PhysicalDevice>& PhysicalDevice() const { return physical_device_; }
   const std::shared_ptr<vk::Device>& Device() const { return device_; }
-  const std::shared_ptr<vk::Queue>& Queue() const { return queue_; }
+
+  const std::shared_ptr<vk::Queue>& GraphicsQueue() const { return graphics_queue_; }
+  const std::shared_ptr<vk::Queue>& VideoQueue() const { return video_queue_; }
 };
 
 }  // namespace vk

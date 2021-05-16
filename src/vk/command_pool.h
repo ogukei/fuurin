@@ -11,24 +11,32 @@ extern "C" {
 
 namespace vk {
 
-class DeviceQueue;
+class Device;
+class Queue;
 
 class CommandPool {
  private:
-  std::shared_ptr<vk::DeviceQueue> device_queue_;
+  std::shared_ptr<vk::Device> device_;
+  std::shared_ptr<vk::Queue> queue_;
   VkCommandPool command_pool_;
 
   bool Initialize();
  public:
   static std::optional<std::shared_ptr<CommandPool>> Create(
-      const std::shared_ptr<vk::DeviceQueue>& device_queue);
+    const std::shared_ptr<vk::Device>& device,
+    const std::shared_ptr<vk::Queue>& queue);
 
-  explicit CommandPool(const std::shared_ptr<vk::DeviceQueue>& device_queue);
+  explicit CommandPool(
+    const std::shared_ptr<vk::Device>& device,
+    const std::shared_ptr<vk::Queue>& queue);
+
   CommandPool(const CommandPool &) = delete;
   ~CommandPool();
 
   VkCommandPool Handle() const { return command_pool_; }
-  const std::shared_ptr<vk::DeviceQueue>& DeviceQueue() const { return device_queue_; }
+
+  const std::shared_ptr<vk::Device>& Device() const { return device_; }
+  const std::shared_ptr<vk::Queue>& Queue() const { return queue_; }
 };
 
 }  // namespace vk

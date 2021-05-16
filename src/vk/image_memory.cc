@@ -28,7 +28,7 @@ ImageMemory::ImageMemory(
 }
 
 void ImageMemory::Initialize() {
-  auto& physical_device = device_->DeviceQueue()->PhysicalDevice();
+  auto& physical_device = device_->PhysicalDevice();
   // requirements
   VkMemoryRequirements memory_requirements = {};
   vkGetImageMemoryRequirements(device_->Handle(), image_, &memory_requirements);

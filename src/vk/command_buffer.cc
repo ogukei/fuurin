@@ -21,7 +21,7 @@ CommandBuffer::CommandBuffer(
 }
 
 void CommandBuffer::Initialize() {
-  auto& device = command_pool_->DeviceQueue()->Device();
+  auto& device = command_pool_->Device();
   VkCommandBufferAllocateInfo allocate_info = {
     .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
     .pNext = nullptr,
@@ -35,7 +35,7 @@ void CommandBuffer::Initialize() {
 }
 
 CommandBuffer::~CommandBuffer() {
-  auto& device = command_pool_->DeviceQueue()->Device();
+  auto& device = command_pool_->Device();
   vkFreeCommandBuffers(device->Handle(), command_pool_->Handle(), 1, &command_buffer_);
   command_buffer_ = nullptr;
 }

@@ -3,6 +3,7 @@
 
 #include "vk/device_queue.h"
 #include "vk/device.h"
+#include "vk/queue.h"
 #include "vk/physical_device.h"
 
 namespace vk {
@@ -25,21 +26,24 @@ std::optional<uint32_t> MemoryTypeIndex(
 }
 
 std::optional<std::shared_ptr<BufferMemory>> BufferMemory::Create(
-    const std::shared_ptr<vk::DeviceQueue>& device_queue,
+    const std::shared_ptr<vk::Device>& device,
+    const std::shared_ptr<vk::Queue>& queue,
     VkDeviceSize size,
     VkBufferUsageFlags buffer_usage_flags,
     VkMemoryPropertyFlags memory_property_flags) {
   auto buffer_memory = std::make_shared<BufferMemory>(
-    device_queue, size, buffer_usage_flags, memory_property_flags);
+    device, queue, size, buffer_usage_flags, memory_property_flags);
   return (buffer_memory->Initialize()) ? std::optional {buffer_memory} : std::nullopt;
 }
 
 BufferMemory::BufferMemory(
-    const std::shared_ptr<vk::DeviceQueue>& device_queue,
+    const std::shared_ptr<vk::Device>& device,
+    const std::shared_ptr<vk::Queue>& queue,
     VkDeviceSize size,
     VkBufferUsageFlags buffer_usage_flags,
     VkMemoryPropertyFlags memory_property_flags)
-    : device_queue_(device_queue),
+    : device_(device),
+      queue_(queue),
       buffer_(nullptr),
       size_(size),
       buffer_usage_flags_(buffer_usage_flags),
@@ -47,8 +51,8 @@ BufferMemory::BufferMemory(
 }
 
 bool BufferMemory::Initialize() {
-  auto& device = device_queue_->Device();
-  uint32_t queue_family_index = device_queue_->QueueFamilyIndex();
+  auto& device = device_;
+  uint32_t queue_family_index = queue_->FamilyIndex();
   // buffer
   VkBuffer buffer = nullptr;
   {
@@ -74,7 +78,7 @@ bool BufferMemory::Initialize() {
     VkMemoryRequirements requirements = {};
     vkGetBufferMemoryRequirements(device->Handle(), buffer, &requirements);
     auto memory_type_index = vk::MemoryTypeIndex(
-      device_queue_->PhysicalDevice(),
+      device_->PhysicalDevice(),
       requirements.memoryTypeBits,
       memory_property_flags_);
     if (!memory_type_index) {
@@ -98,7 +102,7 @@ bool BufferMemory::Initialize() {
 }
 
 BufferMemory::~BufferMemory() {
-  auto& device = device_queue_->Device();
+  auto& device = device_;
   vkFreeMemory(device->Handle(), memory_, nullptr);
   memory_ = nullptr;
   vkDestroyBuffer(device->Handle(), buffer_, nullptr);

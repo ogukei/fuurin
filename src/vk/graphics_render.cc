@@ -124,7 +124,7 @@ void GraphicsRender::Initialize() {
 }
 
 void GraphicsRender::Execute() {
-  auto& queue = command_pool_->DeviceQueue()->Queue();
+  auto& queue = command_pool_->Queue();
   queue->SubmitThenWait(command_buffer_);
 }
 
