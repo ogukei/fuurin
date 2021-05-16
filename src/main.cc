@@ -18,7 +18,7 @@ int main(void) {
     return 0;
   }
   {
-    GLFWwindow* window = glfwCreateWindow(640, 480, "My Title", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(640, 480, "Fuurin", NULL, NULL);
     glfwMakeContextCurrent(window);
     new Render();
     while (!glfwWindowShouldClose(window)) {

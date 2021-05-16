@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 namespace video {
 
@@ -12,6 +13,6 @@ struct Demux {
   virtual uint32_t Height() const = 0;
 };
 
-std::unique_ptr<Demux> CreateDemux();
+std::unique_ptr<Demux> CreateDemux(const std::string& filename);
 
 }  // namespace video

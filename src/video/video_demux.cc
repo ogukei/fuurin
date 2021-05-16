@@ -76,12 +76,12 @@ class DemuxContext : public Demux {
 
  public:
   DemuxContext(const DemuxContext&) = delete;
-  DemuxContext() : reader_(nullptr) {
+  explicit DemuxContext(const std::string& filename) : reader_(nullptr) {
     av_register_all();
     avformat_network_init();
 
     AVFormatContext* context = nullptr;
-    if (avformat_open_input(&context, "/home/user/Downloads/BigBuckBunny.mp4", nullptr, nullptr) != 0) {
+    if (avformat_open_input(&context, filename.c_str(), nullptr, nullptr) != 0) {
       return;
     }
     if (avformat_find_stream_info(context, nullptr) != 0) {
@@ -109,8 +109,8 @@ class DemuxContext : public Demux {
 
 }  // namespace
 
-std::unique_ptr<Demux> CreateDemux() {
-  return std::make_unique<DemuxContext>();
+std::unique_ptr<Demux> CreateDemux(const std::string& filename) {
+  return std::make_unique<DemuxContext>(filename);
 }
 
 }  // namespace video

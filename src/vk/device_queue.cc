@@ -63,7 +63,7 @@ bool DeviceQueue::Initialize(const std::shared_ptr<DeviceQueue>& device_queue) {
       "VK_KHR_video_decode_queue",
       "VK_EXT_video_decode_h264"
     };
-    device_info.enabledExtensionCount = 1;
+    device_info.enabledExtensionCount = extension_names.size();
     device_info.ppEnabledExtensionNames = extension_names.data();
     vkCreateDevice(physical_device_->Handle(), &device_info, nullptr, &device);
   }

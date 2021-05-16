@@ -1,5 +1,5 @@
 
-#include "vk/image_memory.h"
+#include "vk/video_memory.h"
 
 #include "vk/buffer_memory.h"
 #include "vk/device.h"
@@ -8,51 +8,49 @@
 
 namespace vk {
 
-std::shared_ptr<ImageMemory> ImageMemory::Create(
+std::shared_ptr<VideoSessionMemory> VideoSessionMemory::Create(
     const std::shared_ptr<vk::Device>& device,
-    VkImage image,
+    VkDeviceSize allocation_size,
+    uint32_t memory_type_bits,
     VkMemoryPropertyFlags memory_property_flags) {
-  auto image_memory = std::make_shared<ImageMemory>(device, image, memory_property_flags);
-  image_memory->Initialize();
-  return image_memory;
+  auto video_memory = std::make_shared<VideoSessionMemory>(device,
+    allocation_size, memory_type_bits, memory_property_flags);
+  video_memory->Initialize();
+  return video_memory;
 }
 
-ImageMemory::ImageMemory(
+VideoSessionMemory::VideoSessionMemory(
     const std::shared_ptr<vk::Device>& device,
-    VkImage image,
+    VkDeviceSize allocation_size,
+    uint32_t memory_type_bits,
     VkMemoryPropertyFlags memory_property_flags)
-    : image_(image),
-      device_(device),
-      memory_(nullptr),
-      memory_property_flags_(memory_property_flags) {
+    : device_(device),
+      allocation_size_(allocation_size),
+      memory_type_bits_(memory_type_bits),
+      memory_property_flags_(memory_property_flags),
+      memory_(nullptr) {
 }
 
-void ImageMemory::Initialize() {
+void VideoSessionMemory::Initialize() {
   auto& physical_device = device_->DeviceQueue()->PhysicalDevice();
-  // requirements
-  VkMemoryRequirements memory_requirements = {};
-  vkGetImageMemoryRequirements(device_->Handle(), image_, &memory_requirements);
   // memory type index
   uint32_t memory_type_index = vk::MemoryTypeIndex(
     physical_device,
-    memory_requirements.memoryTypeBits,
+    memory_type_bits_,
     memory_property_flags_).value();
   // allocation
-  VkDeviceSize allocation_size = memory_requirements.size;
   VkMemoryAllocateInfo allocate_info = {
     .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
     .pNext = nullptr,
-    .allocationSize = allocation_size,
+    .allocationSize = allocation_size_,
     .memoryTypeIndex = memory_type_index,
   };
   VkDeviceMemory memory = nullptr;
   vkAllocateMemory(device_->Handle(), &allocate_info, nullptr, &memory);
   memory_ = memory;
-  // bind
-  vkBindImageMemory(device_->Handle(), image_, memory, 0);
 }
 
-ImageMemory::~ImageMemory() {
+VideoSessionMemory::~VideoSessionMemory() {
   vkFreeMemory(device_->Handle(), memory_, nullptr);
   memory_ = nullptr;
 }

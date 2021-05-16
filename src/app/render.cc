@@ -25,8 +25,9 @@ extern "C" {
 #include "vk/graphics_render.h"
 #include "vk/offscreen_render.h"
 
+#include "vk/video_decode_session.h"
+
 #include "video/video_demux.h"
-#include "video/video_decode_session.h"
 
 Render::Render() {
   auto instance = vk::Instance::Create();
