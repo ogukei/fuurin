@@ -78,9 +78,11 @@ bool VideoDecodeSession::Initialize() {
     .fieldLayout = VK_VIDEO_DECODE_H264_FIELD_LAYOUT_LINE_INTERLACED_PLANE_BIT_EXT,
   };
   video_profile.pNext = &decode_h264_profile;
+  //
   VkVideoCapabilitiesKHR video_capabilities = { VK_STRUCTURE_TYPE_VIDEO_CAPABILITIES_KHR, nullptr };
   vk_vkGetPhysicalDeviceVideoCapabilitiesKHR(instance->Handle())(
     physical_device->Handle(), &video_profile, &video_capabilities);
+
   // @see https://github.com/nvpro-samples/vk_video_samples/blob/main/vk_video_decoder/libs/NvVkDecoder/NvVkDecoder.cpp#L699
   static const VkExtensionProperties h264StdExtensionVersion = {
     VK_STD_VULKAN_VIDEO_CODEC_H264_EXTENSION_NAME,
@@ -99,8 +101,9 @@ bool VideoDecodeSession::Initialize() {
     .flags = 0,
     .pVideoProfile = &video_profile,
     .pictureFormat = VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM,
-    .maxCodedExtent = {
-      demux->Width(), demux->Height()
+    .maxCodedExtent = VkExtent2D {
+      .width = demux->Width(),
+      .height = demux->Height()
     },
     .referencePicturesFormat = VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM,
     .maxReferencePicturesSlotsCount = 8,

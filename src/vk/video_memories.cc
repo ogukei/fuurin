@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <iostream>
+#include <cstring>
 
 #include "vk/buffer_memory.h"
 #include "vk/device.h"
@@ -16,6 +17,12 @@ namespace vk {
 static PFN_vkGetVideoSessionMemoryRequirementsKHR vk_vkGetVideoSessionMemoryRequirementsKHR(VkDevice device) {
     return (PFN_vkGetVideoSessionMemoryRequirementsKHR)vkGetDeviceProcAddr(
       device, "vkGetVideoSessionMemoryRequirementsKHR");
+}
+
+// @see https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkBindVideoSessionMemoryKHR.html
+static PFN_vkBindVideoSessionMemoryKHR vk_vkBindVideoSessionMemoryKHR(VkDevice device) {
+    return (PFN_vkBindVideoSessionMemoryKHR)vkGetDeviceProcAddr(
+      device, "vkBindVideoSessionMemoryKHR");
 }
 
 std::shared_ptr<VideoSessionMemories> VideoSessionMemories::Create(
@@ -62,10 +69,31 @@ void VideoSessionMemories::Initialize() {
     VkMemoryRequirements2* memory_requirements = memory_requirements_vec.data() + (size_t)i;
     auto memory = VideoSessionMemory::Create(device_,
       memory_requirements->memoryRequirements.size,
-      memory_requirements->memoryRequirements.memoryTypeBits,
-      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+      memory_requirements->memoryRequirements.memoryTypeBits);
     memories[i] = std::move(memory);
   }
+  // binding
+  std::vector<VkVideoBindMemoryKHR> bind_memory_vec;
+  bind_memory_vec.resize(video_requirements_count);
+  for (uint32_t i = 0; i < video_requirements_count; i++) {
+    VkMemoryRequirements2* memory_requirements = memory_requirements_vec.data() + (size_t)i;
+    VkVideoGetMemoryPropertiesKHR* properties = video_properties_vec.data() + (size_t)i;
+    auto& memory = memories.at(i);
+    VkVideoBindMemoryKHR bind_memory = {
+      .sType = VK_STRUCTURE_TYPE_VIDEO_BIND_MEMORY_KHR,
+      .pNext = nullptr,
+      .memoryBindIndex = properties->memoryBindIndex,
+      .memory = memory->Handle(),
+      .memoryOffset = 0,
+      .memorySize = memory_requirements->memoryRequirements.size,
+    };
+    bind_memory_vec[i] = bind_memory;
+  }
+  vk_vkBindVideoSessionMemoryKHR(device->Handle())(
+    device->Handle(),
+    video_session_,
+    static_cast<uint32_t>(bind_memory_vec.size()),
+    bind_memory_vec.data());
 }
 
 VideoSessionMemories::~VideoSessionMemories() {
