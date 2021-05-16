@@ -3,6 +3,7 @@
 
 #include "vk/device.h"
 #include "vk/video_image.h"
+#include "vk/video_image_memory.h"
 
 namespace vk {
 
@@ -34,8 +35,9 @@ VideoSessionFrame::VideoSessionFrame(
 }
 
 void VideoSessionFrame::Initialize() {
-  image_ = VideoSessionImage::Create(
+  image_ = VideoImage::Create(
     device_, queue_, video_profile_, width_, height_, format_);
+  image_memory_ = VideoImageMemory::Create(image_);
 }
 
 VideoSessionFrame::~VideoSessionFrame() {

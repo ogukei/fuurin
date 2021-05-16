@@ -13,7 +13,8 @@ namespace vk {
 class Device;
 class Queue;
 class VideoProfile;
-class VideoSessionImage;
+class VideoImage;
+class VideoImageMemory;
 
 class VideoSessionFrame {
  private:
@@ -23,7 +24,8 @@ class VideoSessionFrame {
   std::shared_ptr<vk::Device> device_;
   std::shared_ptr<vk::Queue> queue_;
   std::shared_ptr<vk::VideoProfile> video_profile_;
-  std::shared_ptr<vk::VideoSessionImage> image_;
+  std::shared_ptr<vk::VideoImage> image_;
+  std::shared_ptr<vk::VideoImageMemory> image_memory_;
 
   void Initialize();
 

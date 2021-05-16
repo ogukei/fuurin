@@ -1,6 +1,8 @@
 
 #include "vk/video_image.h"
 
+#include <iostream>
+
 #include "vk/device.h"
 #include "vk/queue.h"
 #include "vk/device_queue.h"
@@ -8,20 +10,20 @@
 
 namespace vk {
 
-std::shared_ptr<VideoSessionImage> VideoSessionImage::Create(
+std::shared_ptr<VideoImage> VideoImage::Create(
     const std::shared_ptr<vk::Device>& device,
     const std::shared_ptr<vk::Queue>& queue,
     const std::shared_ptr<vk::VideoProfile>& video_profile,
     uint32_t width,
     uint32_t height,
     VkFormat format) {
-  auto video_image = std::make_shared<VideoSessionImage>(
+  auto video_image = std::make_shared<VideoImage>(
     device, queue, video_profile, width, height, format);
   video_image->Initialize();
   return video_image;
 }
 
-VideoSessionImage::VideoSessionImage(
+VideoImage::VideoImage(
     const std::shared_ptr<vk::Device>& device,
     const std::shared_ptr<vk::Queue>& queue,
     const std::shared_ptr<vk::VideoProfile>& video_profile,
@@ -37,7 +39,7 @@ VideoSessionImage::VideoSessionImage(
       image_(nullptr) {
 }
 
-void VideoSessionImage::Initialize() {
+void VideoImage::Initialize() {
   const VkVideoProfileKHR* video_profile = &video_profile_->Profile();
   VkExternalMemoryImageCreateInfo external_memory = {
     .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
@@ -74,7 +76,7 @@ void VideoSessionImage::Initialize() {
   image_ = image;
 }
 
-VideoSessionImage::~VideoSessionImage() {
+VideoImage::~VideoImage() {
   vkDestroyImage(device_->Handle(), image_, nullptr);
   image_ = nullptr;
 }

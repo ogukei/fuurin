@@ -56,8 +56,9 @@ bool VideoDecodeSession::Initialize() {
   auto& queue = device_queue_->VideoQueue();
 
   auto video_profile = VideoProfile::CreateH264Decode(device);
-  //
-  VkFormat format = VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM;
+  // isSemiPlanar == true
+  // @see https://github.com/nvpro-samples/vk_video_samples/blob/95eeeb80879e04183923e2be3d0b93b3652ab868/vk_video_decoder/libs/NvVkDecoder/NvVkDecoder.cpp#L131
+  VkFormat format = VK_FORMAT_G8_B8R8_2PLANE_420_UNORM;
   // @see https://github.com/nvpro-samples/vk_video_samples/blob/main/vk_video_decoder/libs/NvVkDecoder/NvVkDecoder.cpp#L699
   static const VkExtensionProperties h264StdExtensionVersion = {
     VK_STD_VULKAN_VIDEO_CODEC_H264_EXTENSION_NAME,

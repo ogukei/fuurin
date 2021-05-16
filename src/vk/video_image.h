@@ -15,7 +15,7 @@ class Queue;
 class ImageMemory;
 class VideoProfile;
 
-class VideoSessionImage {
+class VideoImage {
  private:
   uint32_t width_;
   uint32_t height_;
@@ -28,7 +28,7 @@ class VideoSessionImage {
   void Initialize();
 
  public:
-  static std::shared_ptr<VideoSessionImage> Create(
+  static std::shared_ptr<VideoImage> Create(
     const std::shared_ptr<vk::Device>& device,
     const std::shared_ptr<vk::Queue>& queue,
     const std::shared_ptr<vk::VideoProfile>& video_profile,
@@ -36,17 +36,19 @@ class VideoSessionImage {
     uint32_t height,
     VkFormat format);
 
-  explicit VideoSessionImage(
+  explicit VideoImage(
     const std::shared_ptr<vk::Device>& device,
     const std::shared_ptr<vk::Queue>& queue,
     const std::shared_ptr<vk::VideoProfile>& video_profile,
     uint32_t width,
     uint32_t height,
     VkFormat format);
-  VideoSessionImage(const VideoSessionImage&) = delete;
-  ~VideoSessionImage();
+  VideoImage(const VideoImage&) = delete;
+  ~VideoImage();
 
   VkImage Handle() const { return image_; }
+
+  const std::shared_ptr<vk::Device>& Device() const { return device_; }
 };
 
 }  // namespace vk

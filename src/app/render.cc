@@ -36,9 +36,6 @@ Render::Render() {
   auto device = device_queue->Device();
   auto command_pool = vk::CommandPool::Create(device, device_queue->GraphicsQueue()).value();
 
-  auto session = std::make_unique<vk::VideoDecodeSession>(device_queue);
-  session->Initialize();
-
   auto framebuffer = vk::Framebuffer::Create(device, 1280, 720);
   auto graphics_pipeline = vk::GraphicsPipeline::Create(device, framebuffer);
   auto graphics_state = vk::GraphicsState::Create(command_pool);
@@ -48,4 +45,7 @@ Render::Render() {
   auto offscreen_render = vk::OffscreenRender::Create(command_pool, framebuffer);
   offscreen_render->Execute();
   offscreen_render->Save("out.ppm");
+
+  auto session = std::make_unique<vk::VideoDecodeSession>(device_queue);
+  session->Initialize();
 }
