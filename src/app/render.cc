@@ -27,7 +27,7 @@ extern "C" {
 
 #include "vk/video_decode_session.h"
 
-#include "video/video_demux.h"
+#include "video/demux.h"
 
 Render::Render() {
   auto instance = vk::Instance::Create();
@@ -46,6 +46,11 @@ Render::Render() {
   offscreen_render->Execute();
   offscreen_render->Save("out.ppm");
 
+  auto demux = video::CreateDemux("/home/user/Downloads/BigBuckBunny.mp4");
+
   auto session = std::make_unique<vk::VideoDecodeSession>(device_queue);
-  session->Initialize();
+  session->Initialize(demux);
+
+  auto segment = demux->NextSegment();
+  std::cout << segment->size << std::endl;
 }

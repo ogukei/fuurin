@@ -15,7 +15,7 @@
 #include "vk/video_memories.h"
 #include "vk/video_frame.h"
 
-#include "video/video_demux.h"
+#include "video/demux.h"
 
 namespace vk {
 
@@ -43,12 +43,12 @@ VideoDecodeSession::VideoDecodeSession(const std::shared_ptr<vk::DeviceQueue>& d
     : device_queue_(device_queue) {
 }
 
-bool VideoDecodeSession::Initialize() {
+bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) {
+  // FIXME:
   // assumes VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR
-  // assumes VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM
+  // assumes VK_FORMAT_G8_B8R8_2PLANE_420_UNORM
   // assumes VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR
   // assumes VK_VIDEO_DECODE_H264_FIELD_LAYOUT_LINE_INTERLACED_PLANE_BIT_EXT
-  auto demux = video::CreateDemux("/home/user/Downloads/BigBuckBunny.mp4");
 
   auto& physical_device = device_queue_->PhysicalDevice();
   auto& instance = physical_device->Instance();
@@ -82,8 +82,8 @@ bool VideoDecodeSession::Initialize() {
       .height = demux->Height()
     },
     .referencePicturesFormat = format,
-    .maxReferencePicturesSlotsCount = 8,
-    .maxReferencePicturesActiveCount = 8
+    .maxReferencePicturesSlotsCount = 17,
+    .maxReferencePicturesActiveCount = 17
   };
   VkVideoSessionKHR video_session = nullptr;
   vk_vkCreateVideoSessionKHR(device->Handle())(device->Handle(), &session_create_info, nullptr, &video_session);
@@ -92,11 +92,8 @@ bool VideoDecodeSession::Initialize() {
   }
   video_session_ = video_session;
   memories_ = VideoSessionMemories::Create(device, video_session);
-  //
+  // decode surface
   auto frame = VideoSessionFrame::Create(device, queue, video_profile, demux->Width(), demux->Height(), format);
-
-  // FIXME: vulkan session should NOT have video demux logic
-  video_demux_ = std::move(demux);
   return true;
 }
 
