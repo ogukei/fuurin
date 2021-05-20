@@ -26,6 +26,7 @@ extern "C" {
 #include "vk/offscreen_render.h"
 
 #include "vk/video_decode_session.h"
+#include "vk/video_bitstream.h"
 
 #include "video/demux.h"
 
@@ -34,23 +35,29 @@ Render::Render() {
   auto physical_device = vk::PhysicalDevice::Create(instance);
   auto device_queue = vk::DeviceQueue::Create(physical_device).value();
   auto device = device_queue->Device();
-  auto command_pool = vk::CommandPool::Create(device, device_queue->GraphicsQueue()).value();
+  auto graphics_command_pool = vk::CommandPool::Create(device, device_queue->GraphicsQueue()).value();
 
   auto framebuffer = vk::Framebuffer::Create(device, 1280, 720);
   auto graphics_pipeline = vk::GraphicsPipeline::Create(device, framebuffer);
-  auto graphics_state = vk::GraphicsState::Create(command_pool);
-  auto graphics_render = vk::GraphicsRender::Create(command_pool, graphics_pipeline, graphics_state);
+  auto graphics_state = vk::GraphicsState::Create(graphics_command_pool);
+  auto graphics_render = vk::GraphicsRender::Create(graphics_command_pool, graphics_pipeline, graphics_state);
   graphics_render->Execute();
 
-  auto offscreen_render = vk::OffscreenRender::Create(command_pool, framebuffer);
+  auto offscreen_render = vk::OffscreenRender::Create(graphics_command_pool, framebuffer);
   offscreen_render->Execute();
   offscreen_render->Save("out.ppm");
 
   auto demux = video::CreateDemux("/home/user/Downloads/BigBuckBunny.mp4");
-
-  auto session = std::make_unique<vk::VideoDecodeSession>(device_queue);
+  auto video_command_pool = vk::CommandPool::Create(device, device_queue->VideoQueue()).value();
+  auto session = std::make_unique<vk::VideoDecodeSession>(video_command_pool);
   session->Initialize(demux);
 
-  auto segment = demux->NextSegment();
-  std::cout << segment->size << std::endl;
+  auto& bitstream_buffer = session->BitstreamBuffer();
+
+  for (uint32_t i = 0; i < 12; i++) {
+    auto segment = demux->NextSegment();
+    bitstream_buffer->AppendSegment(segment.value());
+  }
+
+  session->Begin();
 }

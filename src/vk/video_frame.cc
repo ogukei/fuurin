@@ -4,6 +4,7 @@
 #include "vk/device.h"
 #include "vk/video_image.h"
 #include "vk/video_image_memory.h"
+#include "vk/image_view.h"
 
 namespace vk {
 
@@ -38,6 +39,7 @@ void VideoSessionFrame::Initialize() {
   image_ = VideoImage::Create(
     device_, queue_, video_profile_, width_, height_, format_);
   image_memory_ = VideoImageMemory::Create(image_);
+  image_view_ = ImageView::Create(device_, image_->Handle(), format_, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 VideoSessionFrame::~VideoSessionFrame() {

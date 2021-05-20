@@ -10,10 +10,15 @@
 #include "vk/device_queue.h"
 #include "vk/device.h"
 #include "vk/queue.h"
+#include "vk/command_pool.h"
+#include "vk/command_record.h"
 
 #include "vk/video_profile.h"
 #include "vk/video_memories.h"
 #include "vk/video_frame.h"
+#include "vk/video_reference_slot.h"
+#include "vk/video_bitstream.h"
+#include "vk/video_session_parameters.h"
 
 #include "video/demux.h"
 
@@ -39,10 +44,11 @@ static PFN_vkDestroyVideoSessionKHR vk_vkDestroyVideoSessionKHR(VkDevice device)
     return (PFN_vkDestroyVideoSessionKHR)vkGetDeviceProcAddr(device, "vkDestroyVideoSessionKHR");
 }
 
-VideoDecodeSession::VideoDecodeSession(const std::shared_ptr<vk::DeviceQueue>& device_queue)
-    : device_queue_(device_queue) {
+VideoDecodeSession::VideoDecodeSession(const std::shared_ptr<vk::CommandPool>& command_pool)
+    : command_pool_(command_pool) {
 }
 
+// @see https://www.khronos.org/registry/vulkan/specs/1.2-extensions/html/vkspec.html#video-decode-operations
 bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) {
   // FIXME:
   // assumes VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR
@@ -50,10 +56,10 @@ bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) 
   // assumes VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR
   // assumes VK_VIDEO_DECODE_H264_FIELD_LAYOUT_LINE_INTERLACED_PLANE_BIT_EXT
 
-  auto& physical_device = device_queue_->PhysicalDevice();
+  auto& device = command_pool_->Device();
+  auto& queue = command_pool_->Queue();
+  auto& physical_device = device->PhysicalDevice();
   auto& instance = physical_device->Instance();
-  auto& device = device_queue_->Device();
-  auto& queue = device_queue_->VideoQueue();
 
   auto video_profile = VideoProfile::CreateH264Decode(device);
   // isSemiPlanar == true
@@ -92,13 +98,38 @@ bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) 
   }
   video_session_ = video_session;
   memories_ = VideoSessionMemories::Create(device, video_session);
-  // decode surface
-  auto frame = VideoSessionFrame::Create(device, queue, video_profile, demux->Width(), demux->Height(), format);
+  // video session parameters cannot be built at the moment
+  // parameters_ = VideoSessionParameters::Create(device, video_session);
+  bitstream_buffer_ = VideoBitstreamBuffer::Create(command_pool_);
+  // slots
+  // @see https://github.com/nvpro-samples/vk_video_samples/blob/bbb10b1f34bbbff27b9f303cae4e287a9a676a3f/vk_video_decoder/libs/VkVideoParser/VulkanVideoParser.cpp#L1699
+  uint32_t slot_count = 17;
+  slots_.resize(slot_count);
+  for (uint32_t i = 0; i < slot_count; i++) {
+    auto frame = VideoSessionFrame::Create(device, queue, video_profile, demux->Width(), demux->Height(), format);
+    auto slot = VideoReferenceSlot::Create(frame, i);
+    slots_[i] = std::move(slot);
+  }
   return true;
 }
 
+void VideoDecodeSession::Begin() {
+  auto segment_reference = bitstream_buffer_->PrependSegmentReference();
+  auto command_record = CommandRecord::Begin(command_pool_).value();
+  VkVideoBeginCodingInfoKHR begin_coding_info = {
+    .sType = VK_STRUCTURE_TYPE_VIDEO_BEGIN_CODING_INFO_KHR,
+    .pNext = nullptr,
+    .flags = 0,
+    .codecQualityPreset = VK_VIDEO_CODING_QUALITY_PRESET_NORMAL_BIT_KHR,
+    .videoSession = video_session_,
+    .videoSessionParameters = nullptr,
+    .referenceSlotCount = static_cast<uint32_t>(slots_.size()),
+    .pReferenceSlots = nullptr,
+  };
+}
+
 VideoDecodeSession::~VideoDecodeSession() {
-  auto& device = device_queue_->Device();
+  auto& device = command_pool_->Device();
   vk_vkDestroyVideoSessionKHR(device->Handle())(device->Handle(), video_session_, nullptr);
   video_session_ = nullptr;
 }

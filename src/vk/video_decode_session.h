@@ -17,22 +17,32 @@ class Demux;
 
 namespace vk {
 
-class DeviceQueue;
+class CommandPool;
 class VideoSessionMemories;
+class VideoReferenceSlot;
+class VideoBitstreamBuffer;
+class VideoSessionParameters;
 
 class VideoDecodeSession {
  private:
-  std::shared_ptr<vk::DeviceQueue> device_queue_;
+  std::shared_ptr<vk::CommandPool> command_pool_;
   std::shared_ptr<vk::VideoSessionMemories> memories_;
+  std::vector<std::shared_ptr<vk::VideoReferenceSlot>> slots_;
+  std::shared_ptr<vk::VideoBitstreamBuffer> bitstream_buffer_;
+  std::shared_ptr<vk::VideoSessionParameters> parameters_;
 
   VkVideoSessionKHR video_session_;
+
  public:
   explicit VideoDecodeSession(
-    const std::shared_ptr<vk::DeviceQueue>& device_queue);
+    const std::shared_ptr<vk::CommandPool>& command_pool);
   VideoDecodeSession(const VideoDecodeSession &) = delete;
   ~VideoDecodeSession();
 
   bool Initialize(const std::unique_ptr<video::Demux>& demux);
+  void Begin();
+
+  const std::shared_ptr<vk::VideoBitstreamBuffer>& BitstreamBuffer() const { return bitstream_buffer_; }
 };
 
 }  // namespace vk

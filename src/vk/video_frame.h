@@ -15,6 +15,7 @@ class Queue;
 class VideoProfile;
 class VideoImage;
 class VideoImageMemory;
+class ImageView;
 
 class VideoSessionFrame {
  private:
@@ -26,6 +27,7 @@ class VideoSessionFrame {
   std::shared_ptr<vk::VideoProfile> video_profile_;
   std::shared_ptr<vk::VideoImage> image_;
   std::shared_ptr<vk::VideoImageMemory> image_memory_;
+  std::shared_ptr<vk::ImageView> image_view_;
 
   void Initialize();
 
@@ -48,6 +50,8 @@ class VideoSessionFrame {
 
   VideoSessionFrame(const VideoSessionFrame&) = delete;
   ~VideoSessionFrame();
+
+  const std::shared_ptr<vk::ImageView>& ImageView() const { return image_view_; }
 };
 
 }  // namespace vk
