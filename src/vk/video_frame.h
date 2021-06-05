@@ -51,7 +51,11 @@ class VideoSessionFrame {
   VideoSessionFrame(const VideoSessionFrame&) = delete;
   ~VideoSessionFrame();
 
+  const std::shared_ptr<vk::Queue>& Queue() const { return queue_; }
   const std::shared_ptr<vk::ImageView>& ImageView() const { return image_view_; }
+  const std::shared_ptr<vk::VideoImage>& VideoImage() const { return image_; }
+  uint32_t Width() const { return width_; }
+  uint32_t Height() const { return height_; }
 };
 
 }  // namespace vk

@@ -4,6 +4,8 @@
 extern "C" {
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
+
+#include <unistd.h>
 }
 
 #include <vector>
@@ -41,17 +43,15 @@ Render::Render() {
   auto graphics_pipeline = vk::GraphicsPipeline::Create(device, framebuffer);
   auto graphics_state = vk::GraphicsState::Create(graphics_command_pool);
   auto graphics_render = vk::GraphicsRender::Create(graphics_command_pool, graphics_pipeline, graphics_state);
-  graphics_render->Execute();
+  // graphics_render->Execute();
 
-  auto offscreen_render = vk::OffscreenRender::Create(graphics_command_pool, framebuffer);
-  offscreen_render->Execute();
-  offscreen_render->Save("out.ppm");
+  // auto offscreen_render = vk::OffscreenRender::Create(graphics_command_pool, framebuffer);
+  // offscreen_render->Execute();
+  // offscreen_render->Save("out.ppm");
 
   auto demux = video::CreateDemux("/home/user/Downloads/BigBuckBunny.mp4");
   auto video_command_pool = vk::CommandPool::Create(device, device_queue->VideoQueue()).value();
-  auto session = std::make_unique<vk::VideoDecodeSession>(video_command_pool);
-  session->Initialize(demux);
-
+  auto session = vk::VideoDecodeSession::Create(video_command_pool, demux).value();
   auto& bitstream_buffer = session->BitstreamBuffer();
 
   for (uint32_t i = 0; i < 12; i++) {
@@ -59,5 +59,5 @@ Render::Render() {
     bitstream_buffer->AppendSegment(segment.value());
   }
 
-  session->Begin();
+  //session->Begin();
 }

@@ -28,7 +28,7 @@ void Instance::Initialize() {
   // validation layer
   const char* layers[] = {"VK_LAYER_KHRONOS_validation"};
   const char* extensions[] = {"VK_EXT_debug_utils"};
-  const bool is_debug = true;
+  const bool is_debug = false;
   if (is_debug) {
     instance_info.ppEnabledLayerNames = layers;
     instance_info.enabledLayerCount = 1;

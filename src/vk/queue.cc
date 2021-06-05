@@ -16,6 +16,27 @@ void Queue::Initialize(VkQueue queue) {
   queue_ = queue;
 }
 
+void Queue::Submit(const std::shared_ptr<CommandBuffer>& command_buffer) {
+  auto& device = command_buffer->CommandPool()->Device();
+  VkCommandBuffer command_buffer_handle = command_buffer->Handle();
+
+  // FIXME:
+  VkPipelineStageFlags wait_dst = VK_PIPELINE_STAGE_2_VIDEO_DECODE_BIT_KHR;
+
+  VkSubmitInfo submit_info = {
+    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+    .pNext = nullptr,
+    .waitSemaphoreCount = 0,
+    .pWaitSemaphores = nullptr,
+    .pWaitDstStageMask = &wait_dst,
+    .commandBufferCount = 1,
+    .pCommandBuffers = &command_buffer_handle,
+    .signalSemaphoreCount = 0,
+    .pSignalSemaphores = nullptr
+  };
+  vkQueueSubmit(queue_, 1, &submit_info, nullptr);
+}
+
 void Queue::SubmitThenWait(const std::shared_ptr<CommandBuffer>& command_buffer) {
   auto& device = command_buffer->CommandPool()->Device();
   VkCommandBuffer command_buffer_handle = command_buffer->Handle();

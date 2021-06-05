@@ -13,33 +13,30 @@ namespace vk {
 class Device;
 class VideoSessionFrame;
 
-class VideoReferenceSlot {
+class VideoDecodeSurface {
  private:
   std::shared_ptr<vk::VideoSessionFrame> frame_;
   uint32_t index_;
   VkExtent2D extent_;
-  VkVideoPictureResourceKHR picture_resource_;
-  VkVideoReferenceSlotKHR reference_slot_;
 
   void Initialize();
 
  public:
-  static std::shared_ptr<VideoReferenceSlot> Create(
+  static std::shared_ptr<VideoDecodeSurface> Create(
     const std::shared_ptr<vk::VideoSessionFrame>& frame,
     uint32_t index);
 
-  explicit VideoReferenceSlot(
+  explicit VideoDecodeSurface(
     const std::shared_ptr<vk::VideoSessionFrame>& frame,
     uint32_t index);
 
-  VideoReferenceSlot(const VideoReferenceSlot&) = delete;
-  ~VideoReferenceSlot();
+  VideoDecodeSurface(const VideoDecodeSurface&) = delete;
+  ~VideoDecodeSurface();
 
   const std::shared_ptr<vk::VideoSessionFrame>& Frame() const { return frame_; }
-  VkImageMemoryBarrier2KHR ImageMemoryBarrier() const;
 
-  const VkVideoPictureResourceKHR& VideoPictureResource() const { return picture_resource_; }
-  const VkVideoReferenceSlotKHR& Handle() const { return reference_slot_; }
+  VkImageMemoryBarrier2KHR ImageMemoryBarrier() const;
+  VkVideoPictureResourceKHR VideoPictureResource() const;
 };
 
 }  // namespace vk

@@ -22,7 +22,10 @@ std::shared_ptr<VideoProfile> VideoProfile::CreateH264Decode(
 
 VideoProfile::VideoProfile(
     const std::shared_ptr<vk::Device>& device)
-    : device_(device) {
+    : device_(device),
+      profile_({}),
+      profile_with_ext_({}),
+      decode_h264_profile_({}) {
 }
 
 void VideoProfile::InitializeH264Decode() {

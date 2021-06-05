@@ -16,11 +16,13 @@ extern "C" {
 namespace video {
 
 class PacketReader;
+class FrameParser;
 
 class DemuxContext : public Demux {
  private:
   AVFormatContext* context_;
-  std::unique_ptr<PacketReader> reader_;
+  std::unique_ptr<video::PacketReader> reader_;
+  std::unique_ptr<video::FrameParser> parser_;
 
   AVStream* stream_;
   std::optional<video::BitstreamSegment> segment_;

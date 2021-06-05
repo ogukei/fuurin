@@ -29,7 +29,10 @@ VideoSessionParameters::VideoSessionParameters(
     const std::shared_ptr<vk::Device>& device,
     VkVideoSessionKHR video_session)
     : device_(device),
-      video_session_(video_session) {
+      video_session_(video_session),
+      video_session_parameters_(nullptr),
+      h264_sequence_parameter_set_({}),
+      h264_picture_parameter_set_({}) {
 }
 
 void VideoSessionParameters::Initialize() {
