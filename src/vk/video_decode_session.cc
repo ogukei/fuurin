@@ -166,10 +166,10 @@ void VideoDecodeSession::Begin() {
   auto command_record = CommandRecord::Begin(command_pool_).value();
   auto& device = command_pool_->Device();
 
-  std::vector<VkImageMemoryBarrier2KHR> barrier_vec;
+  std::vector<VkImageMemoryBarrier2KHR> image_barrier_vec;
   {
     for (auto& reference_slot : reference_slots_) {
-      barrier_vec.push_back(reference_slot->ImageMemoryBarrier());
+      image_barrier_vec.push_back(reference_slot->ImageMemoryBarrier());
     }
   }
   std::vector<VkVideoReferenceSlotKHR> reference_slot_vec;
@@ -209,14 +209,60 @@ void VideoDecodeSession::Begin() {
       .pMemoryBarriers = nullptr,
       .bufferMemoryBarrierCount = 1,
       .pBufferMemoryBarriers = &bitstream_buffer_memory_barrier,
-      .imageMemoryBarrierCount = static_cast<uint32_t>(barrier_vec.size()),
-      .pImageMemoryBarriers = barrier_vec.data(),
+      .imageMemoryBarrierCount = static_cast<uint32_t>(image_barrier_vec.size()),
+      .pImageMemoryBarriers = image_barrier_vec.data(),
     };
     vk_vkCmdPipelineBarrier2KHR(device->Handle())(command_record->CommandBuffer(), &dependency_info);
   }
+  StdVideoDecodeH264PictureInfoFlags std_decode_picture_info_flags = {
+    .field_pic_flag = 1,
+    .is_intra = 0,
+    .bottom_field_flag = 0,
+    .is_reference = 1,
+    .complementary_field_pair = 0,
+  };
+  StdVideoDecodeH264PictureInfo std_decode_picture_info = {
+    .seq_parameter_set_id = 0,
+    .pic_parameter_set_id = 0,
+    .reserved = 0,
+    .frame_num = 0,
+    .idr_pic_id = 0,
+    .PicOrderCnt = {},
+    .flags = std_decode_picture_info_flags
+  };
+
+  VkVideoDecodeH264PictureInfoEXT decode_picture_info = {
+    .sType = VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PICTURE_INFO_EXT,
+    .pNext = nullptr,
+    .pStdPictureInfo = &std_decode_picture_info,
+    .slicesCount = 0,
+    .pSlicesDataOffsets = nullptr,
+  };
+
+  /*
+  typedef struct StdVideoDecodeH264PictureInfoFlags {
+    uint32_t field_pic_flag:1;             // Is field picture
+    uint32_t is_intra:1;                   // Is intra picture
+    uint32_t bottom_field_flag:1;          // bottom (true) or top (false) field if field_pic_flag is set.
+    uint32_t is_reference:1;               // This only applies to picture info, and not to the DPB lists.
+    uint32_t complementary_field_pair:1;   // complementary field pair, complementary non-reference field pair, complementary reference field pair
+} StdVideoDecodeH264PictureInfoFlags;
+
+typedef struct StdVideoDecodeH264PictureInfo {
+    uint8_t  seq_parameter_set_id;          // Selecting SPS from the Picture Parameters
+    uint8_t  pic_parameter_set_id;          // Selecting PPS from the Picture Parameters and the SPS
+    uint16_t reserved;                      // for structure members 32-bit packing/alignment
+    uint16_t frame_num;                     // 7.4.3 Slice header semantics
+    uint16_t idr_pic_id;                    // 7.4.3 Slice header semantics
+    // PicOrderCnt is based on TopFieldOrderCnt and BottomFieldOrderCnt. See 8.2.1 Decoding process for picture order count type 0 - 2
+    int32_t  PicOrderCnt[2];                // TopFieldOrderCnt and BottomFieldOrderCnt fields.
+    StdVideoDecodeH264PictureInfoFlags flags;
+} StdVideoDecodeH264PictureInfo;
+*/
+
   VkVideoDecodeInfoKHR decode_info = {
     .sType = VK_STRUCTURE_TYPE_VIDEO_DECODE_INFO_KHR,
-    .pNext = nullptr,
+    .pNext = &decode_picture_info,
     .flags = 0,
     .codedOffset = {},
     .codedExtent = extent_,

@@ -37,6 +37,19 @@ VideoSessionParameters::VideoSessionParameters(
 
 void VideoSessionParameters::Initialize() {
   // @see https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkVideoDecodeH264SessionParametersCreateInfoEXT.html
+
+  // h264_sequence_parameter_set
+  // @see https://github.com/nvpro-samples/vk_video_samples/blob/c851b02743574def866c593fe66d1dff93354e6d/vk_video_decoder/include/vk_video/vulkan_video_codec_h264std.h#L241
+  // h264_sequence_parameter_set_.profile_idc = std_video_h264_profile_idc_high;
+  // h264_sequence_parameter_set_.level_idc = (StdVideoH264Level)31;
+  // h264_sequence_parameter_set_.chroma_format_idc = std_video_h264_chroma_format_idc_420;
+  // h264_sequence_parameter_set_.log2_max_frame_num_minus4 = 3;
+  // h264_sequence_parameter_set_.log2_max_pic_order_cnt_lsb_minus4 = 3;
+  // h264_sequence_parameter_set_.max_num_ref_frames = 3;
+  // h264_sequence_parameter_set_.pic_width_in_mbs_minus1 = 79;
+  // h264_sequence_parameter_set_.pic_height_in_map_units_minus1 = 44;
+
+  // @see https://ffmpeg.org/doxygen/0.7/h264_8h-source.html
   VkVideoDecodeH264SessionParametersAddInfoEXT h264_add = {
     .sType = VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_SESSION_PARAMETERS_ADD_INFO_EXT,
     .pNext = nullptr,
@@ -55,7 +68,7 @@ void VideoSessionParameters::Initialize() {
   VkVideoSessionParametersCreateInfoKHR create_info = {
     .sType = VK_STRUCTURE_TYPE_VIDEO_SESSION_PARAMETERS_CREATE_INFO_KHR,
     .pNext = &h264,
-    .videoSessionParametersTemplate = VkVideoSessionParametersKHR(),
+    .videoSessionParametersTemplate = nullptr,
     .videoSession = video_session_,
   };
   VkVideoSessionParametersKHR video_session_parameters = nullptr;
