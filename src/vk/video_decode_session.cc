@@ -24,6 +24,7 @@
 #include "vk/video_session_parameters.h"
 #include "vk/video_decode_surface.h"
 #include "vk/video_reference_state.h"
+#include "vk/video_query_pool.h"
 
 #include "vk/video_h264_picture_info.h"
 #include "vk/video_h264_picture_parameters.h"
@@ -130,8 +131,9 @@ bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) 
   parameters_ = VideoSessionParameters::Create(device, picture_parameters_, video_session);
   // @see https://github.com/nvpro-samples/vk_video_samples/blob/bbb10b1f34bbbff27b9f303cae4e287a9a676a3f/vk_video_decoder/libs/VkVideoParser/VulkanVideoParser.cpp#L1699
   // decode surfaces
+
+  uint32_t num_decode_surface = 4;
   {
-    uint32_t num_decode_surface = 4;
     decode_surfaces_.resize(num_decode_surface);
     for (uint32_t i = 0; i < num_decode_surface; i++) {
       auto frame = VideoSessionFrame::Create(device, queue, video_profile, demux->Width(), demux->Height(), format);
@@ -144,6 +146,7 @@ bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) 
     demux->Width(), demux->Height()
   };
   reference_state_ = VideoReferenceState::Create(device, queue, video_profile, picture_parameters_, extent, format);
+  video_query_pool_ = VideoQueryPool::Create(device, video_profile, num_decode_surface).value();
   // extent
   extent_ = VkExtent2D {
     .width = demux->Width(),
@@ -167,6 +170,9 @@ void VideoDecodeSession::Begin(const std::shared_ptr<vk::H264PictureInfo>& pictu
   for (auto& reference_slot : reference_state_->ReferenceSlots()) {
     reference_slot_vec.push_back(reference_slot->Handle());
   }
+  // prepare query
+  vkCmdResetQueryPool(command_record->CommandBuffer(), video_query_pool_->Handle(), 0, video_query_pool_->QueryCount());
+  // begin
   VkVideoBeginCodingInfoKHR begin_coding_info = {
     .sType = VK_STRUCTURE_TYPE_VIDEO_BEGIN_CODING_INFO_KHR,
     .pNext = nullptr,
@@ -205,7 +211,9 @@ void VideoDecodeSession::Begin(const std::shared_ptr<vk::H264PictureInfo>& pictu
     };
     vk_vkCmdPipelineBarrier2KHR(device->Handle())(command_record->CommandBuffer(), &dependency_info);
   }
-
+  //
+  vkCmdBeginQuery(command_record->CommandBuffer(), video_query_pool_->Handle(), 0, 0);
+  //
   VkVideoDecodeH264PictureInfoEXT decode_picture_info = {
     .sType = VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PICTURE_INFO_EXT,
     .pNext = nullptr,
@@ -228,6 +236,9 @@ void VideoDecodeSession::Begin(const std::shared_ptr<vk::H264PictureInfo>& pictu
     .pReferenceSlots = nullptr,
   };
   vk_vkCmdDecodeVideoKHR(device->Handle())(command_record->CommandBuffer(), &decode_info);
+  //
+  vkCmdEndQuery(command_record->CommandBuffer(), video_query_pool_->Handle(), 0);
+  // end
   VkVideoEndCodingInfoKHR end_coding_info = {
     .sType = VK_STRUCTURE_TYPE_VIDEO_END_CODING_INFO_KHR,
     .pNext = nullptr,
@@ -237,6 +248,8 @@ void VideoDecodeSession::Begin(const std::shared_ptr<vk::H264PictureInfo>& pictu
 
   auto command_buffer = command_record->End();
   command_pool_->Queue()->Submit(command_buffer);
+  // query result
+  video_query_pool_->DumpResult();
 }
 
 VideoDecodeSession::~VideoDecodeSession() {

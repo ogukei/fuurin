@@ -25,6 +25,7 @@ class VideoBitstreamBuffer;
 class VideoSessionParameters;
 class VideoDecodeSurface;
 class VideoReferenceState;
+class VideoQueryPool;
 class H264PictureParameters;
 class H264PictureInfo;
 
@@ -37,6 +38,7 @@ class VideoDecodeSession {
   std::shared_ptr<vk::VideoBitstreamBuffer> bitstream_buffer_;
   std::shared_ptr<vk::VideoSessionParameters> parameters_;
   std::shared_ptr<vk::H264PictureParameters> picture_parameters_;
+  std::shared_ptr<vk::VideoQueryPool> video_query_pool_;
 
   VkVideoSessionKHR video_session_;
   VkExtent2D extent_;
