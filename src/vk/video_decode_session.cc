@@ -23,6 +23,7 @@
 #include "vk/video_bitstream.h"
 #include "vk/video_session_parameters.h"
 #include "vk/video_decode_surface.h"
+#include "vk/video_reference_state.h"
 
 #include "vk/video_h264_picture_info.h"
 #include "vk/video_h264_picture_parameters.h"
@@ -139,15 +140,10 @@ bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) 
     }
   }
   // dpb
-  {
-    uint32_t num_dpb_references = 4;
-    reference_slots_.resize(num_dpb_references);
-    for (uint32_t i = 0; i < num_dpb_references; i++) {
-      auto frame = VideoSessionFrame::Create(device, queue, video_profile, demux->Width(), demux->Height(), format);
-      auto reference_slot = VideoReferenceSlot::Create(frame, i);
-      reference_slots_[i] = std::move(reference_slot);
-    }
-  }
+  VkExtent2D extent = {
+    demux->Width(), demux->Height()
+  };
+  reference_state_ = VideoReferenceState::Create(device, queue, video_profile, picture_parameters_, extent, format);
   // extent
   extent_ = VkExtent2D {
     .width = demux->Width(),
@@ -163,12 +159,12 @@ void VideoDecodeSession::Begin(const std::shared_ptr<vk::H264PictureInfo>& pictu
 
   std::vector<VkImageMemoryBarrier2KHR> image_barrier_vec;
   {
-    for (auto& reference_slot : reference_slots_) {
-      image_barrier_vec.push_back(reference_slot->ImageMemoryBarrier());
-    }
+    // for (auto& reference_slot : reference_state_->ReferenceSlots()) {
+    //   image_barrier_vec.push_back(reference_slot->ImageMemoryBarrier());
+    // }
   }
   std::vector<VkVideoReferenceSlotKHR> reference_slot_vec;
-  for (auto& reference_slot : reference_slots_) {
+  for (auto& reference_slot : reference_state_->ReferenceSlots()) {
     reference_slot_vec.push_back(reference_slot->Handle());
   }
   VkVideoBeginCodingInfoKHR begin_coding_info = {
@@ -178,8 +174,8 @@ void VideoDecodeSession::Begin(const std::shared_ptr<vk::H264PictureInfo>& pictu
     .codecQualityPreset = VK_VIDEO_CODING_QUALITY_PRESET_NORMAL_BIT_KHR,
     .videoSession = video_session_,
     .videoSessionParameters = parameters_->Handle(),
-    .referenceSlotCount = static_cast<uint32_t>(reference_slot_vec.size()),
-    .pReferenceSlots = reference_slot_vec.data(),
+    .referenceSlotCount = 0,
+    .pReferenceSlots = nullptr,
   };
   vk_vkCmdBeginVideoCodingKHR(device->Handle())(command_record->CommandBuffer(), &begin_coding_info);
   {
@@ -226,10 +222,10 @@ void VideoDecodeSession::Begin(const std::shared_ptr<vk::H264PictureInfo>& pictu
     .srcBuffer = bitstream_buffer_->Buffer(),
     .srcBufferOffset = segment_reference.offset,
     .srcBufferRange = segment_reference.size,
-    .dstPictureResource = reference_slots_.at(0)->VideoPictureResource(),
+    .dstPictureResource = reference_state_->ReferenceSlots().at(0)->VideoPictureResource(),
     .pSetupReferenceSlot = reference_slot_vec.data(),
-    .referenceSlotCount = static_cast<uint32_t>(reference_slot_vec.size()),
-    .pReferenceSlots = reference_slot_vec.data(),
+    .referenceSlotCount = 0,
+    .pReferenceSlots = nullptr,
   };
   vk_vkCmdDecodeVideoKHR(device->Handle())(command_record->CommandBuffer(), &decode_info);
   VkVideoEndCodingInfoKHR end_coding_info = {
@@ -241,7 +237,6 @@ void VideoDecodeSession::Begin(const std::shared_ptr<vk::H264PictureInfo>& pictu
 
   auto command_buffer = command_record->End();
   command_pool_->Queue()->Submit(command_buffer);
-
 }
 
 VideoDecodeSession::~VideoDecodeSession() {

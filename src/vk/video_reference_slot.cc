@@ -43,6 +43,15 @@ void VideoReferenceSlot::Initialize() {
     picture_resource_ = picture_resource;
   }
   // reference slot
+  // @see https://vulkan.lunarg.com/doc/view/1.2.176.1/linux/chunked_spec/chap39.html
+  // {
+  //   StdVideoDecodeH264ReferenceInfo
+  // }
+  // {
+  //   VkVideoDecodeH264DpbSlotInfoEXT h264_info = {
+
+  //   };
+  // }
   {
     VkVideoReferenceSlotKHR reference_slot = {
       .sType = VK_STRUCTURE_TYPE_VIDEO_REFERENCE_SLOT_KHR,

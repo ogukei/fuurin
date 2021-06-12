@@ -14,6 +14,7 @@ class H264PictureInfo;
 namespace video {
 
 class BitstreamSegment;
+struct VideoParserSink;
 
 namespace nvidia_video_parser {
 
@@ -23,7 +24,7 @@ class H264Parser : public VkParserVideoDecodeClient {
   std::shared_ptr<vk::H264PictureParameters> picture_parameters_;
   bool is_sequence_ready_;
 
-  std::optional<std::shared_ptr<vk::H264PictureInfo>> picture_info_;
+  VideoParserSink* sink_;
 
  public:
   H264Parser();
@@ -35,7 +36,7 @@ class H264Parser : public VkParserVideoDecodeClient {
   bool IsSequenceReady() const { return is_sequence_ready_; }
   const std::shared_ptr<vk::H264PictureParameters>& PictureParameters() const { return picture_parameters_; }
 
-  std::shared_ptr<vk::H264PictureInfo> CurrentPictureInfo() const { return picture_info_.value(); }
+  void RegisterSink(VideoParserSink* sink) { sink_ = sink; }
 
   // VkParserVideoDecodeClient
   // @see https://github.com/nvpro-samples/vk_video_samples/blob/95eeeb80879e04183923e2be3d0b93b3652ab868/vk_video_decoder/include/vkvideo_parser/VulkanVideoParserIf.h#L689

@@ -10,6 +10,7 @@
 #include "vk/video_h264_picture_info.h"
 
 #include "video/bitstream_segment.h"
+#include "video/parser_sink.h"
 
 namespace video {
 namespace nvidia_video_parser {
@@ -21,7 +22,7 @@ class PictureBuffer : public vkPicBuffBase {
   virtual ~PictureBuffer() {}
 };
 
-H264Parser::H264Parser() : parser_(nullptr), is_sequence_ready_(false) {
+H264Parser::H264Parser() : parser_(nullptr), is_sequence_ready_(false), sink_(nullptr) {
   bool is_annex_b = true;
   bool ok = CreateVulkanVideoDecodeParser(&parser_, VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_EXT, is_annex_b);
   assert(ok);
@@ -116,7 +117,10 @@ bool H264Parser::DecodePicture(VkParserPictureData* picture_data) {
     picture_data->pBitstreamData,
     picture_data->nNumSlices,
     picture_data->pSliceDataOffsets);
-  picture_info_ = picture_info;
+  // sink
+  if (sink_ != nullptr) {
+    sink_->OnParsePicture(picture_info);
+  }
   return false;
 }
 

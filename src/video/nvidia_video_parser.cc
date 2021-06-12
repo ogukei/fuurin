@@ -11,6 +11,7 @@ namespace video {
 NvidiaVideoParser::NvidiaVideoParser() {
   parser_ = std::make_unique<nvidia_video_parser::H264Parser>();
   parser_->Initialize();
+  parser_->RegisterSink(this);
 }
 
 void NvidiaVideoParser::Parse(const BitstreamSegment& bitstream_segment) {
@@ -21,12 +22,14 @@ const std::shared_ptr<vk::H264PictureParameters>& NvidiaVideoParser::PicturePara
   return parser_->PictureParameters();
 }
 
-std::shared_ptr<vk::H264PictureInfo> NvidiaVideoParser::CurrentPictureInfo() const {
-  return parser_->CurrentPictureInfo();
-}
-
 bool NvidiaVideoParser::IsSequenceReady() const {
   return parser_->IsSequenceReady();
+}
+
+void NvidiaVideoParser::OnParsePicture(const std::shared_ptr<vk::H264PictureInfo>& picture_info) {
+  if (callback_) {
+    callback_(picture_info);
+  }
 }
 
 NvidiaVideoParser::~NvidiaVideoParser() {

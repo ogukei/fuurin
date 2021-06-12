@@ -21,6 +21,9 @@ class VideoReferenceSlot {
   VkVideoPictureResourceKHR picture_resource_;
   VkVideoReferenceSlotKHR reference_slot_;
 
+  VkVideoDecodeH264DpbSlotInfoEXT h264_dpb_slot_info_;
+  StdVideoDecodeH264ReferenceInfo std_reference_info_;
+
   void Initialize();
 
  public:

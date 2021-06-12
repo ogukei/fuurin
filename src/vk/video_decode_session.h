@@ -24,6 +24,7 @@ class VideoReferenceSlot;
 class VideoBitstreamBuffer;
 class VideoSessionParameters;
 class VideoDecodeSurface;
+class VideoReferenceState;
 class H264PictureParameters;
 class H264PictureInfo;
 
@@ -32,7 +33,7 @@ class VideoDecodeSession {
   std::shared_ptr<vk::CommandPool> command_pool_;
   std::shared_ptr<vk::VideoSessionMemories> memories_;
   std::vector<std::shared_ptr<vk::VideoDecodeSurface>> decode_surfaces_;
-  std::vector<std::shared_ptr<vk::VideoReferenceSlot>> reference_slots_;
+  std::shared_ptr<vk::VideoReferenceState> reference_state_;
   std::shared_ptr<vk::VideoBitstreamBuffer> bitstream_buffer_;
   std::shared_ptr<vk::VideoSessionParameters> parameters_;
   std::shared_ptr<vk::H264PictureParameters> picture_parameters_;
