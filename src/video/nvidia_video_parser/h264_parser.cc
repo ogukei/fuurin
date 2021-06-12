@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "video/bitstream_segment.h"
+#include "video/h264_picture_parameters.h"
 
 namespace video {
 namespace nvidia_video_parser {
@@ -19,6 +20,7 @@ H264Parser::H264Parser() : parser_(nullptr) {
   bool is_annex_b = true;
   bool ok = CreateVulkanVideoDecodeParser(&parser_, VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_EXT, is_annex_b);
   assert(ok);
+  picture_parameters_ = std::make_unique<H264PictureParameters>();
 }
 
 void H264Parser::Initialize() {
@@ -43,7 +45,7 @@ void H264Parser::Parse(const BitstreamSegment& input) {
   VkParserBitstreamPacket bitstream_packet = {};
   bitstream_packet.pByteStream = input.data;
   bitstream_packet.nDataLength = input.size;
-  bitstream_packet.bEOS = false;
+  bitstream_packet.bEOS = (input.size == 0);
   bitstream_packet.bEOP = false;
   bitstream_packet.bPTSValid = true;
   bitstream_packet.llPTS = input.presentation_timestamp;
@@ -62,12 +64,14 @@ H264Parser::~H264Parser() {
 int32_t H264Parser::BeginSequence(const VkParserSequenceInfo* info) {
   int32_t dpb_count = 4;
   std::cout << "H264Parser::BeginSequence" << std::endl;
+  std::cout << "nCodedWidth " << info->nCodedWidth  << std::endl;
+  std::cout << "nCodedHeight " << info->nCodedHeight  << std::endl;
 
   return dpb_count;
 }
 
 bool H264Parser::AllocPictureBuffer(VkPicIf** buffer) {
-  // FIXME:
+  // FIXME(ogukei): fix memory leaks
   auto* instance = new PictureBuffer();
   instance->AddRef();
   *buffer = instance;
@@ -81,8 +85,24 @@ bool H264Parser::DecodePicture(VkParserPictureData* data) {
 
 bool H264Parser::UpdatePictureParameters(
     VkPictureParameters* parameters,
-    VkSharedBaseObj<VkParserVideoRefCountBase>& picture_parameters,  // NOLINT
+    VkSharedBaseObj<VkParserVideoRefCountBase>& object,  // NOLINT
     uint64_t update_sequence_count) {
+  std::cout << "H264Parser::UpdatePictureParameters" << std::endl;
+  switch (parameters->updateType) {
+  case VK_PICTURE_PARAMETERS_UPDATE_H264_SPS:
+    picture_parameters_->ConfigureSequenceParameterSet(
+      parameters->pH264Sps,
+      parameters->pH264Sps->pSequenceParameterSetVui,
+      parameters->pH264Sps->pScalingLists);
+    break;
+  case VK_PICTURE_PARAMETERS_UPDATE_H264_PPS:
+    picture_parameters_->ConfigurePictureParameterSet(
+      parameters->pH264Pps,
+      parameters->pH264Pps->pScalingLists);
+    break;
+  default:
+    break;
+  }
   return false;
 }
 

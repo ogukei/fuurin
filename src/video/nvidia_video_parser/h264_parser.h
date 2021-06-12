@@ -9,12 +9,15 @@
 namespace video {
 
 class BitstreamSegment;
+class H264PictureParameters;
 
 namespace nvidia_video_parser {
 
 class H264Parser : public VkParserVideoDecodeClient {
  private:
   VulkanVideoDecodeParser* parser_;
+  std::unique_ptr<H264PictureParameters> picture_parameters_;
+
  public:
   H264Parser();
   virtual ~H264Parser();
@@ -29,7 +32,7 @@ class H264Parser : public VkParserVideoDecodeClient {
   virtual bool DecodePicture(VkParserPictureData* data);
   virtual bool UpdatePictureParameters(
     VkPictureParameters* parameters,
-    VkSharedBaseObj<VkParserVideoRefCountBase>& picture_parameters,  // NOLINT
+    VkSharedBaseObj<VkParserVideoRefCountBase>& object,  // NOLINT
     uint64_t update_sequence_count);
   virtual bool DisplayPicture(VkPicIf* buffer, int64_t pts);
   virtual void UnhandledNALU(const uint8_t* data, int32_t cbdata);
