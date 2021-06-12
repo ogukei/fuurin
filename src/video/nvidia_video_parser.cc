@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "video/bitstream_segment.h"
+#include "video/bitstream_packet.h"
 #include "video/nvidia_video_parser/h264_parser.h"
 
 namespace video {
@@ -14,8 +14,8 @@ NvidiaVideoParser::NvidiaVideoParser() {
   parser_->RegisterSink(this);
 }
 
-void NvidiaVideoParser::Parse(const BitstreamSegment& bitstream_segment) {
-  parser_->Parse(bitstream_segment);
+void NvidiaVideoParser::Parse(const BitstreamPacket& bitstream_packet) {
+  parser_->Parse(bitstream_packet);
 }
 
 const std::shared_ptr<vk::H264PictureParameters>& NvidiaVideoParser::PictureParameters() const {

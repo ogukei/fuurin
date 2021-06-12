@@ -9,7 +9,7 @@
 #include "vk/video_h264_picture_parameters.h"
 #include "vk/video_h264_picture_info.h"
 
-#include "video/bitstream_segment.h"
+#include "video/bitstream_packet.h"
 #include "video/parser_sink.h"
 
 namespace video {
@@ -43,7 +43,7 @@ void H264Parser::Initialize() {
   assert(ok == VK_SUCCESS);
 }
 
-void H264Parser::Parse(const BitstreamSegment& input) {
+void H264Parser::Parse(const BitstreamPacket& input) {
   VkParserBitstreamPacket bitstream_packet = {};
   bitstream_packet.pByteStream = input.data;
   bitstream_packet.nDataLength = input.size;
@@ -91,16 +91,10 @@ bool H264Parser::DecodePicture(VkParserPictureData* picture_data) {
   StdVideoDecodeH264PictureInfoFlags flags = {};
   if (picture_data->field_pic_flag) {
     flags.field_pic_flag = true;
-    if (picture_data->bottom_field_flag) {
-      flags.bottom_field_flag = true;
-    }
+    flags.bottom_field_flag = (picture_data->bottom_field_flag != 0);
   }
-  if (picture_data->second_field) {
-    flags.complementary_field_pair = true;
-  }
-  if (picture_data->ref_pic_flag) {
-    flags.is_reference = true;
-  }
+  flags.complementary_field_pair = (picture_data->second_field != 0);
+  flags.is_reference = (picture_data->ref_pic_flag != 0);
   std_info.flags = flags;
   // PicOrderCnt
   if (picture_data->field_pic_flag) {

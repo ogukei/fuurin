@@ -13,7 +13,7 @@ class H264PictureInfo;
 
 namespace video {
 
-class BitstreamSegment;
+struct BitstreamPacket;
 struct VideoParserSink;
 
 namespace nvidia_video_parser {
@@ -31,7 +31,7 @@ class H264Parser : public VkParserVideoDecodeClient {
   virtual ~H264Parser();
 
   void Initialize();
-  void Parse(const BitstreamSegment& bitstream_segment);
+  void Parse(const BitstreamPacket& bitstream_packet);
 
   bool IsSequenceReady() const { return is_sequence_ready_; }
   const std::shared_ptr<vk::H264PictureParameters>& PictureParameters() const { return picture_parameters_; }

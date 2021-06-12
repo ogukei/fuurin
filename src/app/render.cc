@@ -57,8 +57,8 @@ Render::Render() {
 
   auto parser = std::make_unique<video::NvidiaVideoParser>();
   for (uint32_t i = 0; i < 10; i++) {
-    auto segment = demux->NextSegment().value();
-    parser->Parse(segment);
+    auto packet = demux->NextPacket().value();
+    parser->Parse(packet);
     if (parser->IsSequenceReady()) {
       break;
     }
@@ -74,7 +74,7 @@ Render::Render() {
     session->Begin(picture_info);
   });
   for (uint32_t i = 0; i < 1; i++) {
-    auto segment = demux->NextSegment().value();
-    parser->Parse(segment);
+    auto packet = demux->NextPacket().value();
+    parser->Parse(packet);
   }
 }

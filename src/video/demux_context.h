@@ -25,7 +25,7 @@ class DemuxContext : public Demux {
   std::unique_ptr<video::FrameParser> parser_;
 
   AVStream* stream_;
-  std::optional<video::BitstreamSegment> segment_;
+  std::optional<video::BitstreamPacket> packet_;
 
  public:
   DemuxContext(const DemuxContext&) = delete;
@@ -36,7 +36,7 @@ class DemuxContext : public Demux {
   virtual uint32_t Width() const { return (uint32_t)stream_->codecpar->width;  }
   virtual uint32_t Height() const { return (uint32_t)stream_->codecpar->height; }
 
-  virtual const std::optional<video::BitstreamSegment>& NextSegment();
+  virtual const std::optional<video::BitstreamPacket>& NextPacket();
 };
 
 }  // namespace video

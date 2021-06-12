@@ -29,22 +29,21 @@ DemuxContext::DemuxContext(const std::string& filename)
   // @see https://ffmpeg.org/doxygen/2.8/structAVStream.html
   stream_ = context->streams[stream_index];
   reader_ = std::make_unique<video::PacketReader>(context, stream_index);
-  parser_ = video::FrameParser::Create(context).value();
+  // parser_ = video::FrameParser::Create(context).value();
 }
 
-const std::optional<video::BitstreamSegment>& DemuxContext::NextSegment() {
+const std::optional<video::BitstreamPacket>& DemuxContext::NextPacket() {
   if (reader_->NextFrame()) {
-    segment_ = BitstreamSegment {
+    packet_ = BitstreamPacket {
       .data = reader_->Data(),
       .size = static_cast<size_t>(reader_->Size()),
       .presentation_timestamp = reader_->Packet()->pts,
       .decompression_timestamp = reader_->Packet()->dts
     };
-    parser_->ParseWithPacket(reader_->Packet());
   } else {
-    segment_ = std::nullopt;
+    packet_ = std::nullopt;
   }
-  return segment_;
+  return packet_;
 }
 
 DemuxContext::~DemuxContext() {

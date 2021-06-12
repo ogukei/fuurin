@@ -5,7 +5,7 @@
 
 namespace video {
 
-struct BitstreamSegment {
+struct BitstreamPacket {
   uint8_t* data;
   size_t size;
   // metadata
