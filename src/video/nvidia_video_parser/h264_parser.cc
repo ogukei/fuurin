@@ -2,8 +2,12 @@
 #include "video/nvidia_video_parser/h264_parser.h"
 
 #include <iostream>
+#include <vector>
+#include <utility>
+#include <cstring>
 
 #include "vk/video_h264_picture_parameters.h"
+#include "vk/video_h264_picture_info.h"
 
 #include "video/bitstream_segment.h"
 
@@ -25,10 +29,6 @@ H264Parser::H264Parser() : parser_(nullptr), is_sequence_ready_(false) {
 }
 
 void H264Parser::Initialize() {
-  static const VkExtensionProperties std_extension_name = {
-    VK_STD_VULKAN_VIDEO_CODEC_H264_EXTENSION_NAME,
-    VK_STD_VULKAN_VIDEO_CODEC_H264_SPEC_VERSION
-  };
   // configure parameters
   VkParserInitDecodeParameters parameters = {};
   parameters.interfaceVersion = NV_VULKAN_VIDEO_PARSER_API_VERSION;
@@ -79,8 +79,44 @@ bool H264Parser::AllocPictureBuffer(VkPicIf** buffer) {
   return true;
 }
 
-bool H264Parser::DecodePicture(VkParserPictureData* data) {
+bool H264Parser::DecodePicture(VkParserPictureData* picture_data) {
   std::cout << "H264Parser::DecodePicture" << std::endl;
+  auto* h264_data = &picture_data->CodecSpecific.h264;
+  // configure
+  StdVideoDecodeH264PictureInfo std_info = {};
+  // frame num
+  std_info.frame_num = static_cast<uint16_t>(h264_data->frame_num);
+  // flags
+  StdVideoDecodeH264PictureInfoFlags flags = {};
+  if (picture_data->field_pic_flag) {
+    flags.field_pic_flag = true;
+    if (picture_data->bottom_field_flag) {
+      flags.bottom_field_flag = true;
+    }
+  }
+  if (picture_data->second_field) {
+    flags.complementary_field_pair = true;
+  }
+  if (picture_data->ref_pic_flag) {
+    flags.is_reference = true;
+  }
+  std_info.flags = flags;
+  // PicOrderCnt
+  if (picture_data->field_pic_flag) {
+    int index = (picture_data->bottom_field_flag) ? 1 : 0;
+    std_info.PicOrderCnt[index] = h264_data->CurrFieldOrderCnt[index];
+  } else {
+    std_info.PicOrderCnt[0] = h264_data->CurrFieldOrderCnt[0];
+    std_info.PicOrderCnt[1] = h264_data->CurrFieldOrderCnt[1];
+  }
+  // create info
+  auto picture_info = std::make_shared<vk::H264PictureInfo>(
+    std_info,
+    picture_data->nBitstreamDataLen,
+    picture_data->pBitstreamData,
+    picture_data->nNumSlices,
+    picture_data->pSliceDataOffsets);
+  picture_info_ = picture_info;
   return false;
 }
 

@@ -21,6 +21,10 @@ const std::shared_ptr<vk::H264PictureParameters>& NvidiaVideoParser::PicturePara
   return parser_->PictureParameters();
 }
 
+std::shared_ptr<vk::H264PictureInfo> NvidiaVideoParser::CurrentPictureInfo() const {
+  return parser_->CurrentPictureInfo();
+}
+
 bool NvidiaVideoParser::IsSequenceReady() const {
   return parser_->IsSequenceReady();
 }

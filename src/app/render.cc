@@ -29,9 +29,9 @@ extern "C" {
 
 #include "vk/video_decode_session.h"
 #include "vk/video_bitstream.h"
+#include "vk/video_h264_picture_info.h"
 
 #include "video/demux.h"
-
 #include "video/nvidia_video_parser.h"
 
 Render::Render() {
@@ -59,7 +59,6 @@ Render::Render() {
   for (uint32_t i = 0; i < 10; i++) {
     auto segment = demux->NextSegment().value();
     parser->Parse(segment);
-    bitstream_buffer->AppendSegment(segment);
     //
     if (parser->IsSequenceReady()) {
       std::cout << "IsSequenceReady " << i << std::endl;
@@ -71,4 +70,13 @@ Render::Render() {
     demux,
     bitstream_buffer,
     parser->PictureParameters()).value();
+  //
+  for (uint32_t i = 0; i < 1; i++) {
+    auto segment = demux->NextSegment().value();
+    parser->Parse(segment);
+    auto picture_info = parser->CurrentPictureInfo();
+    // FIXME: I/F
+    bitstream_buffer->AppendSegment(picture_info->BitstreamSegment());
+    session->Begin(picture_info);
+  }
 }

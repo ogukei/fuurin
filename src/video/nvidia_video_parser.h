@@ -6,6 +6,7 @@
 
 namespace vk {
 class H264PictureParameters;
+class H264PictureInfo;
 }  // namespace vk
 
 namespace video {
@@ -26,6 +27,8 @@ class NvidiaVideoParser {
 
   const std::shared_ptr<vk::H264PictureParameters>& PictureParameters() const;
   bool IsSequenceReady() const;
+
+  std::shared_ptr<vk::H264PictureInfo> CurrentPictureInfo() const;
 
   ~NvidiaVideoParser();
 };

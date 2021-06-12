@@ -25,6 +25,7 @@ class VideoBitstreamBuffer;
 class VideoSessionParameters;
 class VideoDecodeSurface;
 class H264PictureParameters;
+class H264PictureInfo;
 
 class VideoDecodeSession {
  private:
@@ -55,7 +56,7 @@ class VideoDecodeSession {
   VideoDecodeSession(const VideoDecodeSession &) = delete;
   ~VideoDecodeSession();
 
-  void Begin();
+  void Begin(const std::shared_ptr<vk::H264PictureInfo>& picture_info);
 
   const std::shared_ptr<vk::VideoBitstreamBuffer>& BitstreamBuffer() const { return bitstream_buffer_; }
 };

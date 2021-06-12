@@ -10,14 +10,12 @@ extern "C" {
 #include <deque>
 #include <optional>
 
-namespace video {
-class BitstreamSegment;
-}
-
 namespace vk {
 
 class CommandPool;
 class BufferMemory;
+
+struct VideoSliceLayerBitstreamSegment;
 
 struct VideoBitstreamSegmentReference {
   VkDeviceSize region_size;
@@ -35,7 +33,7 @@ class VideoBitstreamBuffer {
 
   void Initialize();
   void Write(
-    void *data,
+    const void* data,
     const vk::VideoBitstreamSegmentReference& segment_reference);
 
  public:
@@ -48,7 +46,7 @@ class VideoBitstreamBuffer {
   VideoBitstreamBuffer(const VideoBitstreamBuffer&) = delete;
   ~VideoBitstreamBuffer();
 
-  void AppendSegment(video::BitstreamSegment segment);
+  void AppendSegment(const vk::VideoSliceLayerBitstreamSegment& segment);
   std::optional<vk::VideoBitstreamSegmentReference> PopFrontSegmentReference();
 
   VkBuffer Buffer() const;

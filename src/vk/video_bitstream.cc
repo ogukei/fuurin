@@ -9,7 +9,7 @@
 #include "vk/physical_device.h"
 #include "vk/command_pool.h"
 
-#include "video/bitstream_segment.h"
+#include "vk/video_bitstream_segment.h"
 
 namespace vk {
 
@@ -36,7 +36,7 @@ void VideoBitstreamBuffer::Initialize() {
     .value();
 }
 
-void VideoBitstreamBuffer::Write(void *data, const VideoBitstreamSegmentReference& segment_reference) {
+void VideoBitstreamBuffer::Write(const void* data, const VideoBitstreamSegmentReference& segment_reference) {
   auto& device = command_pool_->Device();
   void *mapped = nullptr;
   // mapping
@@ -59,7 +59,7 @@ void VideoBitstreamBuffer::Write(void *data, const VideoBitstreamSegmentReferenc
   vkUnmapMemory(device->Handle(), buffer_memory_->Memory());
 }
 
-void VideoBitstreamBuffer::AppendSegment(video::BitstreamSegment segment) {
+void VideoBitstreamBuffer::AppendSegment(const vk::VideoSliceLayerBitstreamSegment& segment) {
   // align mapped region with atomic size
   const size_t alignment = 0x40;
   size_t region_size = ((segment.size + (alignment - 1)) & ~(alignment - 1));

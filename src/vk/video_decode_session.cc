@@ -24,20 +24,12 @@
 #include "vk/video_session_parameters.h"
 #include "vk/video_decode_surface.h"
 
+#include "vk/video_h264_picture_info.h"
+#include "vk/video_h264_picture_parameters.h"
+
 #include "video/demux.h"
 
 namespace vk {
-
-#define VK_MAKE_VIDEO_STD_VERSION(major, minor, patch) \
-    ((((uint32_t)(major)) << 22) | (((uint32_t)(minor)) << 12) | ((uint32_t)(patch)))
-
-// @see https://github.com/nvpro-samples/vk_video_samples/blob/main/vk_video_decoder/include/vk_video/vulkan_video_codec_h264std.h#L5
-// Patch version should always be set to 0
-#define VK_STD_VULKAN_VIDEO_CODEC_H264_API_VERSION_0_9 VK_MAKE_VIDEO_STD_VERSION(0, 9, 0)
-
-// Format must be in the form XX.XX where the first two digits are the major and the second two, the minor.
-#define VK_STD_VULKAN_VIDEO_CODEC_H264_SPEC_VERSION   VK_STD_VULKAN_VIDEO_CODEC_H264_API_VERSION_0_9
-#define VK_STD_VULKAN_VIDEO_CODEC_H264_EXTENSION_NAME "VK_STD_vulkan_video_codec_h264"
 
 // @see https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCreateVideoSessionKHR.html
 static PFN_vkCreateVideoSessionKHR vk_vkCreateVideoSessionKHR(VkDevice device) {
@@ -101,10 +93,7 @@ bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) 
   auto& instance = physical_device->Instance();
 
   auto video_profile = VideoProfile::CreateH264Decode(device);
-  // isSemiPlanar == true
-  // @see https://github.com/nvpro-samples/vk_video_samples/blob/95eeeb80879e04183923e2be3d0b93b3652ab868/vk_video_decoder/libs/NvVkDecoder/NvVkDecoder.cpp#L131
   VkFormat format = VK_FORMAT_G8_B8R8_2PLANE_420_UNORM;
-  // @see https://github.com/nvpro-samples/vk_video_samples/blob/main/vk_video_decoder/libs/NvVkDecoder/NvVkDecoder.cpp#L699
   static const VkExtensionProperties h264StdExtensionVersion = {
     VK_STD_VULKAN_VIDEO_CODEC_H264_EXTENSION_NAME,
     VK_STD_VULKAN_VIDEO_CODEC_H264_SPEC_VERSION
@@ -167,7 +156,7 @@ bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) 
   return true;
 }
 
-void VideoDecodeSession::Begin() {
+void VideoDecodeSession::Begin(const std::shared_ptr<vk::H264PictureInfo>& picture_info) {
   auto segment_reference = bitstream_buffer_->PopFrontSegmentReference().value();
   auto command_record = CommandRecord::Begin(command_pool_).value();
   auto& device = command_pool_->Device();
@@ -220,52 +209,14 @@ void VideoDecodeSession::Begin() {
     };
     vk_vkCmdPipelineBarrier2KHR(device->Handle())(command_record->CommandBuffer(), &dependency_info);
   }
-  StdVideoDecodeH264PictureInfoFlags std_decode_picture_info_flags = {
-    .field_pic_flag = 1,
-    .is_intra = 0,
-    .bottom_field_flag = 0,
-    .is_reference = 1,
-    .complementary_field_pair = 0,
-  };
-  StdVideoDecodeH264PictureInfo std_decode_picture_info = {
-    .seq_parameter_set_id = 0,
-    .pic_parameter_set_id = 0,
-    .reserved = 0,
-    .frame_num = 0,
-    .idr_pic_id = 0,
-    .PicOrderCnt = {},
-    .flags = std_decode_picture_info_flags
-  };
 
   VkVideoDecodeH264PictureInfoEXT decode_picture_info = {
     .sType = VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PICTURE_INFO_EXT,
     .pNext = nullptr,
-    .pStdPictureInfo = &std_decode_picture_info,
-    .slicesCount = 0,
-    .pSlicesDataOffsets = nullptr,
+    .pStdPictureInfo = picture_info->StdPictureInfo(),
+    .slicesCount = picture_info->SlicesCount(),
+    .pSlicesDataOffsets = picture_info->SlicesDataOffsets(),
   };
-
-  /*
-  typedef struct StdVideoDecodeH264PictureInfoFlags {
-    uint32_t field_pic_flag:1;             // Is field picture
-    uint32_t is_intra:1;                   // Is intra picture
-    uint32_t bottom_field_flag:1;          // bottom (true) or top (false) field if field_pic_flag is set.
-    uint32_t is_reference:1;               // This only applies to picture info, and not to the DPB lists.
-    uint32_t complementary_field_pair:1;   // complementary field pair, complementary non-reference field pair, complementary reference field pair
-} StdVideoDecodeH264PictureInfoFlags;
-
-typedef struct StdVideoDecodeH264PictureInfo {
-    uint8_t  seq_parameter_set_id;          // Selecting SPS from the Picture Parameters
-    uint8_t  pic_parameter_set_id;          // Selecting PPS from the Picture Parameters and the SPS
-    uint16_t reserved;                      // for structure members 32-bit packing/alignment
-    uint16_t frame_num;                     // 7.4.3 Slice header semantics
-    uint16_t idr_pic_id;                    // 7.4.3 Slice header semantics
-    // PicOrderCnt is based on TopFieldOrderCnt and BottomFieldOrderCnt. See 8.2.1 Decoding process for picture order count type 0 - 2
-    int32_t  PicOrderCnt[2];                // TopFieldOrderCnt and BottomFieldOrderCnt fields.
-    StdVideoDecodeH264PictureInfoFlags flags;
-} StdVideoDecodeH264PictureInfo;
-*/
-
   VkVideoDecodeInfoKHR decode_info = {
     .sType = VK_STRUCTURE_TYPE_VIDEO_DECODE_INFO_KHR,
     .pNext = &decode_picture_info,
@@ -275,7 +226,7 @@ typedef struct StdVideoDecodeH264PictureInfo {
     .srcBuffer = bitstream_buffer_->Buffer(),
     .srcBufferOffset = segment_reference.offset,
     .srcBufferRange = segment_reference.size,
-    .dstPictureResource = decode_surfaces_.at(0)->VideoPictureResource(),
+    .dstPictureResource = reference_slots_.at(0)->VideoPictureResource(),
     .pSetupReferenceSlot = reference_slot_vec.data(),
     .referenceSlotCount = static_cast<uint32_t>(reference_slot_vec.size()),
     .pReferenceSlots = reference_slot_vec.data(),
@@ -290,6 +241,7 @@ typedef struct StdVideoDecodeH264PictureInfo {
 
   auto command_buffer = command_record->End();
   command_pool_->Queue()->Submit(command_buffer);
+
 }
 
 VideoDecodeSession::~VideoDecodeSession() {
