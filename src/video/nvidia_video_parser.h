@@ -4,6 +4,10 @@
 #include <memory>
 #include <string>
 
+namespace vk {
+class H264PictureParameters;
+}  // namespace vk
+
 namespace video {
 
 class BitstreamSegment;
@@ -19,6 +23,9 @@ class NvidiaVideoParser {
   NvidiaVideoParser();
 
   void Parse(const BitstreamSegment& bitstream_segment);
+
+  const std::shared_ptr<vk::H264PictureParameters>& PictureParameters() const;
+  bool IsSequenceReady() const;
 
   ~NvidiaVideoParser();
 };

@@ -3,8 +3,9 @@
 
 #include <iostream>
 
+#include "vk/video_h264_picture_parameters.h"
+
 #include "video/bitstream_segment.h"
-#include "video/h264_picture_parameters.h"
 
 namespace video {
 namespace nvidia_video_parser {
@@ -16,11 +17,11 @@ class PictureBuffer : public vkPicBuffBase {
   virtual ~PictureBuffer() {}
 };
 
-H264Parser::H264Parser() : parser_(nullptr) {
+H264Parser::H264Parser() : parser_(nullptr), is_sequence_ready_(false) {
   bool is_annex_b = true;
   bool ok = CreateVulkanVideoDecodeParser(&parser_, VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_EXT, is_annex_b);
   assert(ok);
-  picture_parameters_ = std::make_unique<H264PictureParameters>();
+  picture_parameters_ = std::make_shared<vk::H264PictureParameters>();
 }
 
 void H264Parser::Initialize() {
@@ -66,7 +67,7 @@ int32_t H264Parser::BeginSequence(const VkParserSequenceInfo* info) {
   std::cout << "H264Parser::BeginSequence" << std::endl;
   std::cout << "nCodedWidth " << info->nCodedWidth  << std::endl;
   std::cout << "nCodedHeight " << info->nCodedHeight  << std::endl;
-
+  is_sequence_ready_ = true;
   return dpb_count;
 }
 

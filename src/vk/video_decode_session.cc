@@ -70,13 +70,20 @@ static PFN_vkCmdPipelineBarrier2KHR vk_vkCmdPipelineBarrier2KHR(VkDevice device)
 
 std::optional<std::unique_ptr<VideoDecodeSession>> VideoDecodeSession::Create(
     const std::shared_ptr<vk::CommandPool>& command_pool,
-    const std::unique_ptr<video::Demux>& demux) {
-  auto session = std::make_unique<VideoDecodeSession>(command_pool);
+    const std::unique_ptr<video::Demux>& demux,
+    const std::shared_ptr<vk::VideoBitstreamBuffer>& bitstream_buffer,
+    const std::shared_ptr<vk::H264PictureParameters>& picture_parameters) {
+  auto session = std::make_unique<VideoDecodeSession>(command_pool, bitstream_buffer, picture_parameters);
   return (session->Initialize(demux)) ? std::optional {std::move(session)} : std::nullopt;
 }
 
-VideoDecodeSession::VideoDecodeSession(const std::shared_ptr<vk::CommandPool>& command_pool)
+VideoDecodeSession::VideoDecodeSession(
+    const std::shared_ptr<vk::CommandPool>& command_pool,
+    const std::shared_ptr<vk::VideoBitstreamBuffer>& bitstream_buffer,
+    const std::shared_ptr<vk::H264PictureParameters>& picture_parameters)
     : command_pool_(command_pool),
+      bitstream_buffer_(bitstream_buffer),
+      picture_parameters_(picture_parameters),
       video_session_(nullptr) {
 }
 
@@ -130,8 +137,7 @@ bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) 
   }
   video_session_ = video_session;
   memories_ = VideoSessionMemories::Create(device, video_session);
-  parameters_ = VideoSessionParameters::Create(device, video_session);
-  bitstream_buffer_ = VideoBitstreamBuffer::Create(command_pool_);
+  parameters_ = VideoSessionParameters::Create(device, picture_parameters_, video_session);
   // @see https://github.com/nvpro-samples/vk_video_samples/blob/bbb10b1f34bbbff27b9f303cae4e287a9a676a3f/vk_video_decoder/libs/VkVideoParser/VulkanVideoParser.cpp#L1699
   // decode surfaces
   {
@@ -162,7 +168,7 @@ bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) 
 }
 
 void VideoDecodeSession::Begin() {
-  auto segment_reference = bitstream_buffer_->PrependSegmentReference().value();
+  auto segment_reference = bitstream_buffer_->PopFrontSegmentReference().value();
   auto command_record = CommandRecord::Begin(command_pool_).value();
   auto& device = command_pool_->Device();
 

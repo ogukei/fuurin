@@ -52,20 +52,23 @@ Render::Render() {
   // offscreen_render->Save("out.ppm");
 
   auto demux = video::CreateDemux("/home/user/Downloads/BigBuckBunny.mp4");
-  // auto video_command_pool = vk::CommandPool::Create(device, device_queue->VideoQueue()).value();
-  // auto session = vk::VideoDecodeSession::Create(video_command_pool, demux).value();
-  // auto& bitstream_buffer = session->BitstreamBuffer();
-
-  // for (uint32_t i = 0; i < 12; i++) {
-  //   auto segment = demux->NextSegment();
-  //   bitstream_buffer->AppendSegment(segment.value());
-  // }
-
-  // session->Begin();
+  auto video_command_pool = vk::CommandPool::Create(device, device_queue->VideoQueue()).value();
+  auto bitstream_buffer = vk::VideoBitstreamBuffer::Create(video_command_pool);
 
   auto parser = std::make_unique<video::NvidiaVideoParser>();
-  for (uint32_t i = 0; i < 12; i++) {
+  for (uint32_t i = 0; i < 10; i++) {
     auto segment = demux->NextSegment().value();
     parser->Parse(segment);
+    bitstream_buffer->AppendSegment(segment);
+    //
+    if (parser->IsSequenceReady()) {
+      std::cout << "IsSequenceReady " << i << std::endl;
+      break;
+    }
   }
+  auto session = vk::VideoDecodeSession::Create(
+    video_command_pool,
+    demux,
+    bitstream_buffer,
+    parser->PictureParameters()).value();
 }

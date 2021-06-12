@@ -6,17 +6,21 @@
 
 #include "nvidia_video_parser/nvidia_video_parser.h"
 
+namespace vk {
+class H264PictureParameters;
+}  // namespace vk
+
 namespace video {
 
 class BitstreamSegment;
-class H264PictureParameters;
 
 namespace nvidia_video_parser {
 
 class H264Parser : public VkParserVideoDecodeClient {
  private:
   VulkanVideoDecodeParser* parser_;
-  std::unique_ptr<H264PictureParameters> picture_parameters_;
+  std::shared_ptr<vk::H264PictureParameters> picture_parameters_;
+  bool is_sequence_ready_;
 
  public:
   H264Parser();
@@ -24,6 +28,9 @@ class H264Parser : public VkParserVideoDecodeClient {
 
   void Initialize();
   void Parse(const BitstreamSegment& bitstream_segment);
+
+  bool IsSequenceReady() const { return is_sequence_ready_; }
+  const std::shared_ptr<vk::H264PictureParameters>& PictureParameters() const { return picture_parameters_; }
 
   // VkParserVideoDecodeClient
   // @see https://github.com/nvpro-samples/vk_video_samples/blob/95eeeb80879e04183923e2be3d0b93b3652ab868/vk_video_decoder/include/vkvideo_parser/VulkanVideoParserIf.h#L689

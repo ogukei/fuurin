@@ -49,7 +49,7 @@ class VideoBitstreamBuffer {
   ~VideoBitstreamBuffer();
 
   void AppendSegment(video::BitstreamSegment segment);
-  std::optional<vk::VideoBitstreamSegmentReference> PrependSegmentReference();
+  std::optional<vk::VideoBitstreamSegmentReference> PopFrontSegmentReference();
 
   VkBuffer Buffer() const;
 };

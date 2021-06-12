@@ -11,24 +11,26 @@ extern "C" {
 namespace vk {
 
 class Device;
+class H264PictureParameters;
 
 class VideoSessionParameters {
  private:
   std::shared_ptr<vk::Device> device_;
+  std::shared_ptr<vk::H264PictureParameters> picture_parameters_;
+
   VkVideoSessionKHR video_session_;
   VkVideoSessionParametersKHR video_session_parameters_;
-
-  StdVideoH264SequenceParameterSet h264_sequence_parameter_set_;
-  StdVideoH264PictureParameterSet h264_picture_parameter_set_;
 
   void Initialize();
  public:
   static std::shared_ptr<VideoSessionParameters> Create(
     const std::shared_ptr<vk::Device>& device,
+    const std::shared_ptr<vk::H264PictureParameters>& picture_parameters,
     VkVideoSessionKHR video_session);
 
   explicit VideoSessionParameters(
     const std::shared_ptr<vk::Device>& device,
+    const std::shared_ptr<vk::H264PictureParameters>& picture_parameters,
     VkVideoSessionKHR video_session);
 
   VideoSessionParameters(const VideoSessionParameters&) = delete;

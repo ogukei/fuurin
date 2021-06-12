@@ -24,6 +24,7 @@ class VideoReferenceSlot;
 class VideoBitstreamBuffer;
 class VideoSessionParameters;
 class VideoDecodeSurface;
+class H264PictureParameters;
 
 class VideoDecodeSession {
  private:
@@ -33,6 +34,7 @@ class VideoDecodeSession {
   std::vector<std::shared_ptr<vk::VideoReferenceSlot>> reference_slots_;
   std::shared_ptr<vk::VideoBitstreamBuffer> bitstream_buffer_;
   std::shared_ptr<vk::VideoSessionParameters> parameters_;
+  std::shared_ptr<vk::H264PictureParameters> picture_parameters_;
 
   VkVideoSessionKHR video_session_;
   VkExtent2D extent_;
@@ -42,10 +44,14 @@ class VideoDecodeSession {
  public:
   static std::optional<std::unique_ptr<VideoDecodeSession>> Create(
     const std::shared_ptr<vk::CommandPool>& command_pool,
-    const std::unique_ptr<video::Demux>& demux);
+    const std::unique_ptr<video::Demux>& demux,
+    const std::shared_ptr<vk::VideoBitstreamBuffer>& bitstream_buffer,
+    const std::shared_ptr<vk::H264PictureParameters>& picture_parameters);
 
   explicit VideoDecodeSession(
-    const std::shared_ptr<vk::CommandPool>& command_pool);
+    const std::shared_ptr<vk::CommandPool>& command_pool,
+    const std::shared_ptr<vk::VideoBitstreamBuffer>& bitstream_buffer,
+    const std::shared_ptr<vk::H264PictureParameters>& picture_parameters);
   VideoDecodeSession(const VideoDecodeSession &) = delete;
   ~VideoDecodeSession();
 

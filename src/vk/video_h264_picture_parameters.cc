@@ -1,7 +1,7 @@
 
-#include "video/h264_picture_parameters.h"
+#include "vk/video_h264_picture_parameters.h"
 
-namespace video {
+namespace vk {
 
 H264PictureParameters::H264PictureParameters() {
 }
@@ -34,4 +34,4 @@ void H264PictureParameters::ConfigurePictureParameterSet(
 H264PictureParameters::~H264PictureParameters() {
 }
 
-}  // namespace video
+}  // namespace vk

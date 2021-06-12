@@ -74,7 +74,7 @@ void VideoBitstreamBuffer::AppendSegment(video::BitstreamSegment segment) {
   offset_ += region_size;
 }
 
-std::optional<VideoBitstreamSegmentReference> VideoBitstreamBuffer::PrependSegmentReference() {
+std::optional<VideoBitstreamSegmentReference> VideoBitstreamBuffer::PopFrontSegmentReference() {
   if (segment_references_.empty()) return std::nullopt;
   VideoBitstreamSegmentReference reference = segment_references_.front();
   segment_references_.pop_front();

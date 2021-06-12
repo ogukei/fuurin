@@ -17,6 +17,14 @@ void NvidiaVideoParser::Parse(const BitstreamSegment& bitstream_segment) {
   parser_->Parse(bitstream_segment);
 }
 
+const std::shared_ptr<vk::H264PictureParameters>& NvidiaVideoParser::PictureParameters() const {
+  return parser_->PictureParameters();
+}
+
+bool NvidiaVideoParser::IsSequenceReady() const {
+  return parser_->IsSequenceReady();
+}
+
 NvidiaVideoParser::~NvidiaVideoParser() {
 }
 

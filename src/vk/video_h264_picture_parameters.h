@@ -10,7 +10,7 @@ extern "C" {
 #include <memory>
 #include <optional>
 
-namespace video {
+namespace vk {
 
 class H264PictureParameters {
  private:
@@ -34,6 +34,9 @@ class H264PictureParameters {
   void ConfigurePictureParameterSet(
     const StdVideoH264PictureParameterSet* pps,
     const StdVideoH264ScalingLists* pps_scaling_lists);
+
+  const std::optional<StdVideoH264SequenceParameterSet>& SequenceParameterSet() const { return sps_; }
+  const std::optional<StdVideoH264PictureParameterSet>& PictureParameterSet() const { return pps_; }
 };
 
-}  // namespace video
+}  // namespace vk
