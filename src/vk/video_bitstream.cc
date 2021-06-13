@@ -66,12 +66,12 @@ void VideoBitstreamBuffer::AppendSegment(const vk::VideoSliceLayerBitstreamSegme
   VideoBitstreamSegmentReference segment_reference = {
     .region_size = region_size,
     .size = segment.size,
-    .offset = offset_,
+    .offset = 0,
   };
   Write(segment.data, segment_reference);
   segment_references_.push_back(segment_reference);
   // calculate next offset
-  offset_ += region_size;
+  // offset_ += region_size;
 }
 
 std::optional<VideoBitstreamSegmentReference> VideoBitstreamBuffer::PopFrontSegmentReference() {

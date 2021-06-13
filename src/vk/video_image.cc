@@ -40,7 +40,7 @@ VideoImage::VideoImage(
 }
 
 void VideoImage::Initialize() {
-  const VkVideoProfileKHR* video_profile = &video_profile_->Profile();
+  const VkVideoProfileKHR* video_profile = &video_profile_->ProfileWithExt();
   VkExternalMemoryImageCreateInfo external_memory = {
     .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
     .pNext = video_profile,

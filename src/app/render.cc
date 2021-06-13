@@ -73,7 +73,7 @@ Render::Render() {
     bitstream_buffer->AppendSegment(picture_info->BitstreamSegment());
     session->Begin(picture_info);
   });
-  for (uint32_t i = 0; i < 1; i++) {
+  for (uint32_t i = 0; i < 12; i++) {
     auto packet = demux->NextPacket().value();
     parser->Parse(packet);
   }

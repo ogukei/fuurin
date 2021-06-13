@@ -8,6 +8,7 @@
 
 #include "vk/video_h264_picture_parameters.h"
 #include "vk/video_h264_picture_info.h"
+#include "vk/video_h264_dpb_entry.h"
 
 #include "video/bitstream_packet.h"
 #include "video/parser_sink.h"
@@ -66,8 +67,8 @@ H264Parser::~H264Parser() {
 int32_t H264Parser::BeginSequence(const VkParserSequenceInfo* info) {
   int32_t dpb_count = 4;
   std::cout << "H264Parser::BeginSequence" << std::endl;
-  std::cout << "nCodedWidth " << info->nCodedWidth  << std::endl;
-  std::cout << "nCodedHeight " << info->nCodedHeight  << std::endl;
+  std::cout << "  nCodedWidth " << info->nCodedWidth  << std::endl;
+  std::cout << "  nCodedHeight " << info->nCodedHeight  << std::endl;
   is_sequence_ready_ = true;
   return dpb_count;
 }
@@ -104,13 +105,46 @@ bool H264Parser::DecodePicture(VkParserPictureData* picture_data) {
     std_info.PicOrderCnt[0] = h264_data->CurrFieldOrderCnt[0];
     std_info.PicOrderCnt[1] = h264_data->CurrFieldOrderCnt[1];
   }
+  // dpb
+  VkParserH264DpbEntry* dpb_entries = h264_data->dpb;
+  size_t dpb_max_count = sizeof(h264_data->dpb) / sizeof(h264_data->dpb[0]);
+  std::vector<vk::H264DecodedPictureBufferEntry> entries;
+  for (int i = 0; i < dpb_max_count; i++) {
+    auto* entry = dpb_entries + i;
+    int32_t frame_index = entry->FrameIdx;
+    int32_t reference_flags = entry->used_for_reference;
+    int32_t is_long_term = entry->is_long_term;
+    int32_t is_non_existing = entry->not_existing;
+    int32_t top_field_order_count = entry->FieldOrderCnt[0];
+    int32_t bottom_field_order_count = entry->FieldOrderCnt[1];
+    if (reference_flags != 0) {
+      bool is_field_reference = (reference_flags == 1 || reference_flags == 2);
+      bool is_top_field_flag = ((reference_flags & 1) != 0);
+      bool is_bottom_field_flag = ((reference_flags & 2) != 0);
+      vk::H264DecodedPictureBufferEntry entry = {
+        .frame_index = frame_index,
+        .reference_flags = reference_flags,
+        .is_long_term = is_long_term,
+        .is_non_existing = is_non_existing,
+        .top_field_order_count = top_field_order_count,
+        .bottom_field_order_count = bottom_field_order_count,
+        .is_field_reference = is_field_reference,
+        .is_top_field_flag = is_top_field_flag,
+        .is_bottom_field_flag = is_bottom_field_flag,
+      };
+      entries.push_back(entry);
+    }
+  }
   // create info
   auto picture_info = std::make_shared<vk::H264PictureInfo>(
     std_info,
     picture_data->nBitstreamDataLen,
     picture_data->pBitstreamData,
     picture_data->nNumSlices,
-    picture_data->pSliceDataOffsets);
+    picture_data->pSliceDataOffsets,
+    std::move(entries),
+    // FIXME(ogukei): validate int16_t frame index
+    h264_data->frame_num);
   // sink
   if (sink_ != nullptr) {
     sink_->OnParsePicture(picture_info);

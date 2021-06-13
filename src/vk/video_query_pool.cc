@@ -60,7 +60,6 @@ void VideoQueryPool::DumpResult() {
   VkResult result = vkGetQueryPoolResults(device_->Handle(),
     Handle(), 0, 1, sizeof(decode_status), &decode_status, 512, VK_QUERY_RESULT_WAIT_BIT);
   assert(result == VK_SUCCESS);
-  assert(decode_status.decodeStatus == VK_QUERY_RESULT_STATUS_COMPLETE_KHR);
   std::cout << "VideoQueryPool::DumpResult()" << std::endl
     << "  status: " << decode_status.decodeStatus << std::endl
     << "  cycles_count: " << decode_status.hwCyclesCount << std::endl
@@ -68,6 +67,7 @@ void VideoQueryPool::DumpResult() {
     << "  correctly_decoded: " << decode_status.mbsCorrectlyDecoded << std::endl
     << "  in_error: " << decode_status.mbsInError << std::endl
     << "  instance_id: " << decode_status.instanceId << std::endl;
+  assert(decode_status.decodeStatus == VK_QUERY_RESULT_STATUS_COMPLETE_KHR);
 }
 
 VideoQueryPool::~VideoQueryPool() {

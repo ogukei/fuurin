@@ -48,10 +48,9 @@ void VideoProfile::InitializeH264Decode() {
   VkVideoDecodeH264ProfileEXT decode_h264_profile = {
     .sType = VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PROFILE_EXT,
     .pNext = nullptr,
-    // note that `std_video_h264_profile_idc_main` is defined in vulkan_video_codec_h264std.h
     // @see https://github.com/nvpro-samples/vk_video_samples/blob/c851b02743574def866c593fe66d1dff93354e6d/vk_video_decoder/include/vk_video/vulkan_video_codec_h264std.h
-    .stdProfileIdc = std_video_h264_profile_idc_high,
-    .fieldLayout = VK_VIDEO_DECODE_H264_FIELD_LAYOUT_LINE_INTERLACED_PLANE_BIT_EXT,
+    .stdProfileIdc = std_video_h264_profile_idc_invalid,
+    .fieldLayout = VK_VIDEO_DECODE_H264_PROGRESSIVE_PICTURES_ONLY_EXT,
   };
   decode_h264_profile_ = decode_h264_profile;
   video_profile.pNext = &decode_h264_profile_;

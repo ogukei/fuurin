@@ -8,8 +8,8 @@ H264PictureParameters::H264PictureParameters() {
 
 void H264PictureParameters::ConfigureSequenceParameterSet(
     const StdVideoH264SequenceParameterSet* sps,
-    const StdVideoH264SequenceParameterSetVui *sps_vui,
-    const StdVideoH264ScalingLists *sps_scaling_lists) {
+    const StdVideoH264SequenceParameterSetVui* sps_vui,
+    const StdVideoH264ScalingLists* sps_scaling_lists) {
   sps_ = *sps;
   if (sps_vui != nullptr) {
     sps_vui_ = *sps_vui;

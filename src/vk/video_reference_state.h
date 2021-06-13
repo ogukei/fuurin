@@ -8,6 +8,7 @@ extern "C" {
 
 #include <memory>
 #include <vector>
+#include <optional>
 
 namespace vk {
 
@@ -16,6 +17,8 @@ class Queue;
 class VideoProfile;
 class VideoReferenceSlot;
 class H264PictureParameters;
+class H264PictureInfo;
+class VideoSessionFrame;
 
 class VideoReferenceState {
  private:
@@ -26,9 +29,18 @@ class VideoReferenceState {
   VkExtent2D extent_;
   VkFormat format_;
 
-  std::vector<std::shared_ptr<vk::VideoReferenceSlot>> reference_slots_;
+  std::vector<std::shared_ptr<vk::VideoReferenceSlot>> slots_;
+
+  std::optional<std::shared_ptr<vk::VideoReferenceSlot>> setup_reference_slot_;
+  std::optional<VkVideoReferenceSlotKHR> setup_reference_slot_info_;
+
+  std::vector<std::shared_ptr<vk::VideoReferenceSlot>> slots_in_use_;
+  std::vector<VkVideoReferenceSlotKHR> reference_slots_info_vec_;
+
+  std::vector<VkImageMemoryBarrier2KHR> image_memory_barrier_vec_;
 
   void Initialize();
+  std::optional<std::shared_ptr<vk::VideoReferenceSlot>> FindAvailableSlot() const;
 
  public:
   static std::shared_ptr<VideoReferenceState> Create(
@@ -50,7 +62,16 @@ class VideoReferenceState {
   VideoReferenceState(const VideoReferenceState&) = delete;
   ~VideoReferenceState();
 
-  const std::vector<std::shared_ptr<vk::VideoReferenceSlot>>& ReferenceSlots() const { return reference_slots_; }
+  // decode staging
+  void BeginDecode(const std::shared_ptr<vk::H264PictureInfo>& picture_info);
+  void EndDecode(const std::shared_ptr<vk::H264PictureInfo>& picture_info);
+
+  // stage information
+  const VkVideoReferenceSlotKHR& SetupReferenceSlotInfo() const { return setup_reference_slot_info_.value(); }
+  VkVideoPictureResourceKHR PictureResourceDestination() const;
+  const std::vector<VkVideoReferenceSlotKHR>& ReferenceSlotsVec() const { return reference_slots_info_vec_; }
+
+  const std::vector<VkImageMemoryBarrier2KHR>& ImageMemoryBarriers() const { return image_memory_barrier_vec_; }
 };
 
 }  // namespace vk

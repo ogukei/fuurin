@@ -34,7 +34,16 @@ void Queue::Submit(const std::shared_ptr<CommandBuffer>& command_buffer) {
     .signalSemaphoreCount = 0,
     .pSignalSemaphores = nullptr
   };
-  vkQueueSubmit(queue_, 1, &submit_info, nullptr);
+  VkFenceCreateInfo fence_info = {
+    .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+    .pNext = nullptr,
+    .flags = 0
+  };
+  VkFence fence = nullptr;
+  vkCreateFence(device->Handle(), &fence_info, nullptr, &fence);
+  vkQueueSubmit(queue_, 1, &submit_info, fence);
+  vkWaitForFences(device->Handle(), 1, &fence, VK_TRUE, UINT64_MAX);
+  vkDestroyFence(device->Handle(), fence, nullptr);
 }
 
 void Queue::SubmitThenWait(const std::shared_ptr<CommandBuffer>& command_buffer) {

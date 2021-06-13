@@ -28,8 +28,8 @@ class H264PictureParameters {
 
   void ConfigureSequenceParameterSet(
     const StdVideoH264SequenceParameterSet* sps,
-    const StdVideoH264SequenceParameterSetVui *sps_vui,
-    const StdVideoH264ScalingLists *sps_scaling_lists);
+    const StdVideoH264SequenceParameterSetVui* sps_vui,
+    const StdVideoH264ScalingLists* sps_scaling_lists);
 
   void ConfigurePictureParameterSet(
     const StdVideoH264PictureParameterSet* pps,
