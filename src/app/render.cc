@@ -73,8 +73,9 @@ Render::Render() {
     bitstream_buffer->AppendSegment(picture_info->BitstreamSegment());
     session->Begin(picture_info);
   });
-  for (uint32_t i = 0; i < 12; i++) {
+  for (uint32_t i = 0; i < 120; i++) {
     auto packet = demux->NextPacket().value();
     parser->Parse(packet);
   }
+  session->DumpPicture("out.ppm");
 }

@@ -72,6 +72,9 @@ class VideoReferenceState {
   const std::vector<VkVideoReferenceSlotKHR>& ReferenceSlotsVec() const { return reference_slots_info_vec_; }
 
   const std::vector<VkImageMemoryBarrier2KHR>& ImageMemoryBarriers() const { return image_memory_barrier_vec_; }
+
+  // for debug
+  const std::shared_ptr<vk::VideoReferenceSlot>& SetupReferenceSlot() const { return setup_reference_slot_.value(); }
 };
 
 }  // namespace vk

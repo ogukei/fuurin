@@ -25,6 +25,7 @@
 #include "vk/video_decode_surface.h"
 #include "vk/video_reference_state.h"
 #include "vk/video_query_pool.h"
+#include "vk/video_offscreen_render.h"
 
 #include "vk/video_h264_picture_info.h"
 #include "vk/video_h264_picture_parameters.h"
@@ -240,12 +241,23 @@ void VideoDecodeSession::Begin(const std::shared_ptr<vk::H264PictureInfo>& pictu
   vk_vkCmdEndVideoCodingKHR(device->Handle())(command_record->CommandBuffer(), &end_coding_info);
 
   auto command_buffer = command_record->End();
-  command_pool_->Queue()->Submit(command_buffer);
+  command_pool_->Queue()->SubmitThenWaitStage(
+    command_buffer,
+    VK_PIPELINE_STAGE_2_VIDEO_DECODE_BIT_KHR);
 
   // query result
   video_query_pool_->DumpResult();
   //
   reference_state_->EndDecode(picture_info);
+}
+
+void VideoDecodeSession::DumpPicture(const std::string& filename) {
+  // FIXME(ogukei): use decode surface pool to allow async outputs
+  auto& slot = reference_state_->SetupReferenceSlot();
+  auto& frame = slot->Frame();
+  auto offscreen_render = vk::VideoOffscreenRender::Create(command_pool_, frame);
+  offscreen_render->Execute();
+  offscreen_render->Save(filename);
 }
 
 VideoDecodeSession::~VideoDecodeSession() {

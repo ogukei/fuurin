@@ -4,6 +4,7 @@
 #include <iostream>
 #include <utility>
 #include <algorithm>
+#include <cassert>
 
 #include "vk/video_frame.h"
 #include "vk/video_image.h"
@@ -97,7 +98,8 @@ void VideoReferenceState::BeginDecode(const std::shared_ptr<vk::H264PictureInfo>
     for (auto& unused_slot : unused_slots) {
       unused_slot->UnmarkInUse();
     }
-    slots_in_use_ = used_slots;
+    assert(used_slots.size() == used_frame_indices.size());
+    slots_in_use_ = std::move(used_slots);
   }
   // configure used slots
   for (auto& slot : slots_in_use_) {
@@ -152,7 +154,6 @@ void VideoReferenceState::EndDecode(const std::shared_ptr<vk::H264PictureInfo>& 
   setup_reference_slot->SetImageLayout(VK_IMAGE_LAYOUT_VIDEO_DECODE_DST_KHR);
   slots_in_use_.push_back(setup_reference_slot);
   // clear
-  setup_reference_slot_ = std::nullopt;
   setup_reference_slot_info_ = std::nullopt;
 }
 

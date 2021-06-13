@@ -26,8 +26,8 @@ class Queue {
   void Initialize(VkQueue queue);
   uint32_t FamilyIndex() const { return family_index_; }
 
-  void Submit(const std::shared_ptr<CommandBuffer>&);
   void SubmitThenWait(const std::shared_ptr<CommandBuffer>&);
+  void SubmitThenWaitStage(const std::shared_ptr<CommandBuffer>&, VkPipelineStageFlags);
 };
 
 }  // namespace vk

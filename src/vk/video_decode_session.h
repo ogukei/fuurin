@@ -11,6 +11,7 @@ extern "C" {
 #include <memory>
 #include <vector>
 #include <optional>
+#include <string>
 
 namespace video {
 class Demux;
@@ -62,6 +63,8 @@ class VideoDecodeSession {
   void Begin(const std::shared_ptr<vk::H264PictureInfo>& picture_info);
 
   const std::shared_ptr<vk::VideoBitstreamBuffer>& BitstreamBuffer() const { return bitstream_buffer_; }
+
+  void DumpPicture(const std::string& filename);
 };
 
 }  // namespace vk
