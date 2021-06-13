@@ -4,8 +4,6 @@
 extern "C" {
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
-
-#include <unistd.h>
 }
 
 #include <vector>
@@ -35,26 +33,17 @@ extern "C" {
 #include "video/nvidia_video_parser.h"
 
 Render::Render() {
+}
+
+void Render::Run(const std::string& filename) {
   auto instance = vk::Instance::Create();
   auto physical_device = vk::PhysicalDevice::Create(instance);
   auto device_queue = vk::DeviceQueue::Create(physical_device).value();
   auto device = device_queue->Device();
-  auto graphics_command_pool = vk::CommandPool::Create(device, device_queue->GraphicsQueue()).value();
-
-  auto framebuffer = vk::Framebuffer::Create(device, 1280, 720);
-  auto graphics_pipeline = vk::GraphicsPipeline::Create(device, framebuffer);
-  auto graphics_state = vk::GraphicsState::Create(graphics_command_pool);
-  auto graphics_render = vk::GraphicsRender::Create(graphics_command_pool, graphics_pipeline, graphics_state);
-  // graphics_render->Execute();
-
-  // auto offscreen_render = vk::OffscreenRender::Create(graphics_command_pool, framebuffer);
-  // offscreen_render->Execute();
-  // offscreen_render->Save("out.ppm");
-
-  auto demux = video::CreateDemux("/home/user/Downloads/BigBuckBunny.mp4");
   auto video_command_pool = vk::CommandPool::Create(device, device_queue->VideoQueue()).value();
   auto bitstream_buffer = vk::VideoBitstreamBuffer::Create(video_command_pool);
-
+  // supports some certain video formats. h264 progressive yuv420 with 3 dbp slots.
+  auto demux = video::CreateDemux(filename);
   auto parser = std::make_unique<video::NvidiaVideoParser>();
   for (uint32_t i = 0; i < 10; i++) {
     auto packet = demux->NextPacket().value();
@@ -73,7 +62,8 @@ Render::Render() {
     bitstream_buffer->AppendSegment(picture_info->BitstreamSegment());
     session->Begin(picture_info);
   });
-  for (uint32_t i = 0; i < 120; i++) {
+  uint32_t target_frame = 340;
+  for (uint32_t i = 0; i < target_frame; i++) {
     auto packet = demux->NextPacket().value();
     parser->Parse(packet);
   }

@@ -244,6 +244,7 @@ void VideoOffscreenRender::Save(const std::string& filename) {
       output.write(reinterpret_cast<char*>(&b), 1);
     }
   }
+  std::cout << "Image successfully written to " << filename << std::endl;
 }
 
 VideoOffscreenRender::~VideoOffscreenRender() {

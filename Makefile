@@ -1,5 +1,9 @@
 
-# dependencies: libglfw3 libglfw3-dev libavformat-dev libavcodec-dev libglm-dev
+# dependencies: libavformat-dev libavcodec-dev libglm-dev
+
+# Vulkan Instance Version: 1.2.178
+# NVIDIA Driver Version: 455.50.19
+# Ubuntu 18.04 LTS
 
 TARGET=main
 
@@ -22,7 +26,9 @@ LIB_NVIDIA_VIDEO_PARSER_DIR=bin/libs/nv_vkvideo_parser/linux_amd64_release
 LIB_NVIDIA_VIDEO_PARSER_RPATH=-Wl,-rpath=$(LIB_NVIDIA_VIDEO_PARSER_DIR)
 LIB_NVIDIA_VIDEO_PARSER=-L$(LIB_NVIDIA_VIDEO_PARSER_DIR) -lnvidia-vkvideo-parser $(LIB_NVIDIA_VIDEO_PARSER_RPATH)
 
-LIBS=$(shell pkg-config --libs glfw3) $(LIB_NVIDIA_VIDEO_PARSER)
+#LIB_GLFW=$(shell pkg-config --libs glfw3)
+
+LIBS=$(LIB_NVIDIA_VIDEO_PARSER)
 
 SOURCES=$(shell find $(SOURCE_DIR) -name '*.cc')
 OBJECTS=$(patsubst $(SOURCE_DIR)/%.cc, $(BUILD_DIR)/%.o, $(SOURCES))

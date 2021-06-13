@@ -88,7 +88,6 @@ bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) 
   // assumes VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR
   // assumes VK_FORMAT_G8_B8R8_2PLANE_420_UNORM
   // assumes VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR
-  // assumes VK_VIDEO_DECODE_H264_FIELD_LAYOUT_LINE_INTERLACED_PLANE_BIT_EXT
 
   auto& device = command_pool_->Device();
   auto& queue = command_pool_->Queue();
@@ -132,7 +131,6 @@ bool VideoDecodeSession::Initialize(const std::unique_ptr<video::Demux>& demux) 
   parameters_ = VideoSessionParameters::Create(device, picture_parameters_, video_session);
   // @see https://github.com/nvpro-samples/vk_video_samples/blob/bbb10b1f34bbbff27b9f303cae4e287a9a676a3f/vk_video_decoder/libs/VkVideoParser/VulkanVideoParser.cpp#L1699
   // decode surfaces
-
   uint32_t num_decode_surface = 4;
   {
     decode_surfaces_.resize(num_decode_surface);
