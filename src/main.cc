@@ -3,30 +3,20 @@ extern "C" {
 // Vulkan
 #define VK_ENABLE_BETA_EXTENSIONS
 #include <vulkan/vulkan.h>
-// GLFW
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 }
+
+#include <iostream>
 
 #include "app/render.h"
 
-int main(void) {
-  if (!glfwInit()) {
+int main(int argc, const char** argv) {
+  if (argc != 2) {
+    std::cout << "Usage: ./main BigBuckBunny.mp4" << std::endl;
+    std::cout << "* http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" << std::endl;
     return 0;
   }
-  if (!glfwVulkanSupported()) {
-    return 0;
-  }
-  {
-    GLFWwindow* window = glfwCreateWindow(640, 480, "My Title", NULL, NULL);
-    glfwMakeContextCurrent(window);
-    new Render();
-    while (!glfwWindowShouldClose(window)) {
-      glfwWaitEvents();
-    }
-    glfwMakeContextCurrent(NULL);
-    glfwDestroyWindow(window);
-  }
-  glfwTerminate();
+  std::string filename = argv[1];
+  auto* app = new Render();
+  app->Run(filename);
   return 0;
 }

@@ -8,20 +8,42 @@
 
 namespace vk {
 
-Queue::Queue(const std::shared_ptr<DeviceQueue>& device_queue)
-    : queue_(nullptr), device_queue_(device_queue) {
-}
-
-uint32_t Queue::FamilyIndex() const {
-  return device_queue_->QueueFamilyIndex();
+Queue::Queue(const std::shared_ptr<DeviceQueue>& device_queue, uint32_t family_index)
+    : queue_(nullptr), device_queue_(device_queue), family_index_(family_index) {
 }
 
 void Queue::Initialize(VkQueue queue) {
   queue_ = queue;
 }
 
+void Queue::SubmitThenWaitStage(const std::shared_ptr<CommandBuffer>& command_buffer, VkPipelineStageFlags wait_dst) {
+  auto& device = command_buffer->CommandPool()->Device();
+  VkCommandBuffer command_buffer_handle = command_buffer->Handle();
+  VkSubmitInfo submit_info = {
+    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+    .pNext = nullptr,
+    .waitSemaphoreCount = 0,
+    .pWaitSemaphores = nullptr,
+    .pWaitDstStageMask = &wait_dst,
+    .commandBufferCount = 1,
+    .pCommandBuffers = &command_buffer_handle,
+    .signalSemaphoreCount = 0,
+    .pSignalSemaphores = nullptr
+  };
+  VkFenceCreateInfo fence_info = {
+    .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+    .pNext = nullptr,
+    .flags = 0
+  };
+  VkFence fence = nullptr;
+  vkCreateFence(device->Handle(), &fence_info, nullptr, &fence);
+  vkQueueSubmit(queue_, 1, &submit_info, fence);
+  vkWaitForFences(device->Handle(), 1, &fence, VK_TRUE, UINT64_MAX);
+  vkDestroyFence(device->Handle(), fence, nullptr);
+}
+
 void Queue::SubmitThenWait(const std::shared_ptr<CommandBuffer>& command_buffer) {
-  auto& device = command_buffer->CommandPool()->DeviceQueue()->Device();
+  auto& device = command_buffer->CommandPool()->Device();
   VkCommandBuffer command_buffer_handle = command_buffer->Handle();
   VkSubmitInfo submit_info = {
     .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,

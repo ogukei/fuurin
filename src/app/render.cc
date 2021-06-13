@@ -25,27 +25,47 @@ extern "C" {
 #include "vk/graphics_render.h"
 #include "vk/offscreen_render.h"
 
-#include "video/video_demux.h"
-#include "video/video_decode_session.h"
+#include "vk/video_decode_session.h"
+#include "vk/video_bitstream.h"
+#include "vk/video_h264_picture_info.h"
+
+#include "video/demux.h"
+#include "video/nvidia_video_parser.h"
 
 Render::Render() {
+}
+
+void Render::Run(const std::string& filename) {
   auto instance = vk::Instance::Create();
   auto physical_device = vk::PhysicalDevice::Create(instance);
   auto device_queue = vk::DeviceQueue::Create(physical_device).value();
   auto device = device_queue->Device();
-  auto queue = device_queue->Queue();
-  auto command_pool = vk::CommandPool::Create(device_queue).value();
-
-  auto session = std::make_unique<vk::VideoDecodeSession>(device_queue);
-  session->Initialize();
-
-  auto framebuffer = vk::Framebuffer::Create(device, 1280, 720);
-  auto graphics_pipeline = vk::GraphicsPipeline::Create(device, framebuffer);
-  auto graphics_state = vk::GraphicsState::Create(command_pool);
-  auto graphics_render = vk::GraphicsRender::Create(command_pool, graphics_pipeline, graphics_state);
-  graphics_render->Execute();
-
-  auto offscreen_render = vk::OffscreenRender::Create(command_pool, framebuffer);
-  offscreen_render->Execute();
-  offscreen_render->Save("out.ppm");
+  auto video_command_pool = vk::CommandPool::Create(device, device_queue->VideoQueue()).value();
+  auto bitstream_buffer = vk::VideoBitstreamBuffer::Create(video_command_pool);
+  // supports some certain video formats. h264 progressive yuv420 with 3 dbp slots.
+  auto demux = video::CreateDemux(filename);
+  auto parser = std::make_unique<video::NvidiaVideoParser>();
+  for (uint32_t i = 0; i < 10; i++) {
+    auto packet = demux->NextPacket().value();
+    parser->Parse(packet);
+    if (parser->IsSequenceReady()) {
+      break;
+    }
+  }
+  auto session = vk::VideoDecodeSession::Create(
+    video_command_pool,
+    demux,
+    bitstream_buffer,
+    parser->PictureParameters()).value();
+  // register callbacks
+  parser->RegisterCallback([&](const std::shared_ptr<vk::H264PictureInfo>& picture_info) {
+    bitstream_buffer->AppendSegment(picture_info->BitstreamSegment());
+    session->Begin(picture_info);
+  });
+  uint32_t target_frame = 340;
+  for (uint32_t i = 0; i < target_frame; i++) {
+    auto packet = demux->NextPacket().value();
+    parser->Parse(packet);
+  }
+  session->DumpPicture("out.ppm");
 }

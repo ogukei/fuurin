@@ -3,26 +3,32 @@
 
 #include "vk/device_queue.h"
 #include "vk/device.h"
+#include "vk/queue.h"
 
 namespace vk {
 
 std::optional<std::shared_ptr<CommandPool>> CommandPool::Create(
-    const std::shared_ptr<vk::DeviceQueue>& device_queue) {
-  auto command_pool = std::make_shared<CommandPool>(device_queue);
+    const std::shared_ptr<vk::Device>& device,
+    const std::shared_ptr<vk::Queue>& queue) {
+  auto command_pool = std::make_shared<CommandPool>(device, queue);
   return (command_pool->Initialize()) ? std::optional {command_pool} : std::nullopt;
 }
 
-CommandPool::CommandPool(const std::shared_ptr<vk::DeviceQueue>& device_queue)
-    : device_queue_(device_queue), command_pool_(nullptr) {
+CommandPool::CommandPool(
+    const std::shared_ptr<vk::Device>& device,
+    const std::shared_ptr<vk::Queue>& queue)
+    : device_(device),
+      queue_(queue),
+      command_pool_(nullptr) {
 }
 
 bool CommandPool::Initialize() {
-  auto& device = device_queue_->Device();
+  auto& device = device_;
   VkCommandPoolCreateInfo create_info = {
     .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     .pNext = nullptr,
     .flags = 0,
-    .queueFamilyIndex = device_queue_->QueueFamilyIndex(),
+    .queueFamilyIndex = queue_->FamilyIndex(),
   };
   VkCommandPool command_pool = nullptr;
   vkCreateCommandPool(device->Handle(), &create_info, nullptr, &command_pool);
@@ -32,7 +38,7 @@ bool CommandPool::Initialize() {
 }
 
 CommandPool::~CommandPool() {
-  auto& device = device_queue_->Device();
+  auto& device = device_;
   vkDestroyCommandPool(device->Handle(), command_pool_, nullptr);
   command_pool_ = nullptr;
 }

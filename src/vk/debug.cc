@@ -59,7 +59,7 @@ void DebugUtilsMessenger::Initialize() {
     return;
   }
   fn(instance_, &create_info, nullptr, &messenger);
-  messenger = messenger_;
+  messenger_ = messenger;
 }
 
 DebugUtilsMessenger::~DebugUtilsMessenger() {

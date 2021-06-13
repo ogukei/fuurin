@@ -28,12 +28,12 @@ ImageMemory::ImageMemory(
 }
 
 void ImageMemory::Initialize() {
-  auto& physical_device = device_->DeviceQueue()->PhysicalDevice();
+  auto& physical_device = device_->PhysicalDevice();
   // requirements
   VkMemoryRequirements memory_requirements = {};
   vkGetImageMemoryRequirements(device_->Handle(), image_, &memory_requirements);
   // memory type index
-  uint32_t memoryTypeIndex = vk::MemoryTypeIndex(
+  uint32_t memory_type_index = vk::MemoryTypeIndex(
     physical_device,
     memory_requirements.memoryTypeBits,
     memory_property_flags_).value();
@@ -43,7 +43,7 @@ void ImageMemory::Initialize() {
     .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
     .pNext = nullptr,
     .allocationSize = allocation_size,
-    .memoryTypeIndex = memoryTypeIndex,
+    .memoryTypeIndex = memory_type_index,
   };
   VkDeviceMemory memory = nullptr;
   vkAllocateMemory(device_->Handle(), &allocate_info, nullptr, &memory);

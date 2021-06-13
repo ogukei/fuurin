@@ -21,6 +21,7 @@ class ImageView {
   VkImageAspectFlags aspect_mask_;
 
   void Initialize();
+
  public:
   static std::shared_ptr<ImageView> Create(
     const std::shared_ptr<vk::Device>& device,
